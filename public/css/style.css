@@ -1881,4 +1881,484 @@ footer {
   border-color: var(--accent);
 }
 
+/* ==========================================================================
+   FLOATING WHATSAPP CHAT ASSISTANCE WIDGET
+   ========================================================================== */
+
+.whatsapp-float {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background-color: #25d366;
+  color: #fff;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+  z-index: 1999;
+  transition: all var(--transition-normal);
+  animation: pulseWhatsApp 2s infinite;
+}
+
+.whatsapp-float:hover {
+  transform: scale(1.1) translateY(-3px);
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.6);
+  background-color: #128c7e;
+}
+
+@keyframes pulseWhatsApp {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  }
+}
+
+@media (max-width: 768px) {
+  .whatsapp-float {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 52px;
+    height: 52px;
+  }
+}
+
+/* ==========================================================================
+   INTERACTIVE BEFORE/AFTER REPAIR GALLERY
+   ========================================================================== */
+
+.before-after-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.before-after-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all var(--transition-normal);
+  position: relative;
+}
+
+.before-after-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-5px);
+}
+
+.ba-image-container {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  background-color: #000;
+}
+
+.ba-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity var(--transition-slow);
+  display: block;
+}
+
+.ba-img-after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0; /* Hidden initially */
+}
+
+.before-after-card:hover .ba-img-after {
+  opacity: 1; /* Shows after on hover */
+}
+
+.ba-badge {
+  position: absolute;
+  top: 1rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  z-index: 5;
+  pointer-events: none;
+  letter-spacing: 0.5px;
+}
+
+.ba-badge-before {
+  left: 1rem;
+  background-color: #ff3333;
+  color: #fff;
+}
+
+.ba-badge-after {
+  right: 1rem;
+  background-color: var(--status-ready);
+  color: #fff;
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+}
+
+.before-after-card:hover .ba-badge-after {
+  opacity: 1;
+}
+
+.ba-content {
+  padding: 1.5rem;
+}
+
+.ba-content h4 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.ba-content p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.ba-hover-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 0.75rem;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   COLLAPSIBLE ACCORDION FAQ SECTION
+   ========================================================================== */
+
+.faq-list {
+  max-width: 750px;
+  margin: 2.5rem auto 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.faq-item {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all var(--transition-fast);
+}
+
+.faq-header {
+  padding: 1.25rem 1.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.05rem;
+  user-select: none;
+  transition: color var(--transition-fast);
+}
+
+.faq-header:hover {
+  color: var(--accent);
+}
+
+.faq-icon {
+  font-size: 1rem;
+  color: var(--accent);
+  transition: transform var(--transition-normal);
+}
+
+.faq-answer {
+  padding: 0 1.75rem;
+  max-height: 0;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  transition: all var(--transition-normal) ease-in-out;
+}
+
+.faq-item.active {
+  border-color: rgba(255, 106, 0, 0.25);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.faq-item.active .faq-header {
+  color: var(--accent);
+}
+
+.faq-item.active .faq-icon {
+  transform: rotate(180deg);
+}
+
+.faq-item.active .faq-answer {
+  padding-bottom: 1.5rem;
+  max-height: 200px; /* Expands smoothly */
+}
+
+/* ==========================================================================
+   SERVICE TIPS & BLOG COMPONENT
+   ========================================================================== */
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.tips-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+}
+
+.tips-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-5px);
+}
+
+.tips-img-box {
+  height: 170px;
+  overflow: hidden;
+  position: relative;
+}
+
+.tips-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-normal);
+}
+
+.tips-card:hover .tips-img {
+  transform: scale(1.05);
+}
+
+.tips-tag {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  background-color: rgba(6, 7, 10, 0.8);
+  backdrop-filter: blur(4px);
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+
+.tips-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.tips-content h4 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.tips-content p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin-bottom: 1.25rem;
+}
+
+.tips-readmore {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tips-readmore:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   DIGITAL BIKE HEALTH DIAGNOSTIC REPORT CARD
+   ========================================================================== */
+
+.health-card {
+  background: linear-gradient(135deg, rgba(255, 106, 0, 0.03) 0%, rgba(20, 22, 28, 0.9) 100%);
+  border: 1px solid rgba(255, 106, 0, 0.15);
+  border-radius: var(--radius-md);
+  padding: 2rem;
+  margin-top: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.health-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--accent);
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 106, 0, 0.15);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.health-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+.health-item {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.health-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.health-status-badge {
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}
+
+.health-good { color: var(--status-ready); }
+.health-caution { color: #ff9800; }
+.health-danger { color: #f44336; }
+
+/* ==========================================================================
+   DYNAMIC CUSTOMER LOYALTY REWARDS
+   ========================================================================== */
+
+.loyalty-card {
+  background: linear-gradient(135deg, rgba(0, 188, 212, 0.05) 0%, rgba(20, 22, 28, 0.9) 100%);
+  border: 1px solid rgba(0, 188, 212, 0.2);
+  border-radius: var(--radius-md);
+  padding: 1.75rem 2rem;
+  margin-top: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .loyalty-card {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.loyalty-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.loyalty-tier-badge {
+  background-color: rgba(0, 188, 212, 0.15);
+  color: #00bcd4;
+  border: 1px solid rgba(0, 188, 212, 0.3);
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  width: fit-content;
+  margin-bottom: 0.25rem;
+}
+
+@media (max-width: 600px) {
+  .loyalty-tier-badge {
+    margin: 0 auto 0.25rem auto;
+  }
+}
+
+.loyalty-stars {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 1.3rem;
+  color: #ffd700; /* Gold */
+}
+
+@media (max-width: 600px) {
+  .loyalty-stars {
+    justify-content: center;
+  }
+}
+
+/* ==========================================================================
+   ADMIN DIAGNOSTICS SELECTORS
+   ========================================================================== */
+
+.admin-health-inspections {
+  margin-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-health-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.admin-health-item label {
+  font-size: 0.7rem;
+  margin-bottom: 0;
+  text-transform: capitalize;
+}
+
+.admin-health-select {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: #fff;
+  cursor: pointer;
+}
+
+
 

@@ -276,6 +276,16 @@ function renderBookings() {
     else if (b.status === 'Ready for Delivery') statusClass = 'status-ready';
     else if (b.status === 'Completed') statusClass = 'status-completed';
 
+    // Parse diagnostic health report JSON
+    let health = { battery: 'Healthy', oil: 'Excellent', brakes: 'OK', spark: 'Clean', chain: 'Lubricated' };
+    if (b.health_report && b.health_report.trim() !== '') {
+      try {
+        health = JSON.parse(b.health_report);
+      } catch (e) {
+        console.error('Failed to parse health report for booking', b.id, e);
+      }
+    }
+
     return `
       <div class="admin-booking-card" id="card-${b.id}">
         <!-- Card Header -->
@@ -318,8 +328,8 @@ function renderBookings() {
         </div>
 
         <!-- Admin Control Form Area -->
-        <div class="admin-booking-actions">
-          <div class="action-left">
+        <div class="admin-booking-actions" style="display: flex; flex-direction: column; gap: 1.25rem;">
+          <div class="action-left" style="display: flex; flex-wrap: wrap; gap: 1rem; width: 100%;">
             
             <div class="action-item">
               <label for="status-${b.id}" style="font-size:0.75rem;">Status</label>
@@ -343,8 +353,55 @@ function renderBookings() {
 
           </div>
 
-          <div class="action-right" style="display: flex; gap: 0.5rem; align-items: flex-end;">
-            <div class="action-item" style="margin-right: 0.5rem;">
+          <!-- Bike Health Inspection Checklist Dropdowns -->
+          <div class="admin-health-inspections" style="width: 100%; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+            <label style="font-size: 0.75rem; color: var(--accent); margin-bottom: 0.75rem; display: block; font-weight: 700;">⚙️ Bike Diagnostics Health Report</label>
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+              <div class="admin-health-item">
+                <label for="health-battery-${b.id}">🔋 Battery</label>
+                <select id="health-battery-${b.id}" class="admin-health-select">
+                  <option value="Healthy" ${health.battery === 'Healthy' ? 'selected' : ''}>Healthy</option>
+                  <option value="Weak" ${health.battery === 'Weak' ? 'selected' : ''}>Weak</option>
+                  <option value="Needs Charge" ${health.battery === 'Needs Charge' ? 'selected' : ''}>Needs Charge</option>
+                </select>
+              </div>
+              <div class="admin-health-item">
+                <label for="health-oil-${b.id}">🛢️ Engine Oil</label>
+                <select id="health-oil-${b.id}" class="admin-health-select">
+                  <option value="Excellent" ${health.oil === 'Excellent' ? 'selected' : ''}>Excellent</option>
+                  <option value="Low" ${health.oil === 'Low' ? 'selected' : ''}>Low</option>
+                  <option value="Blackened" ${health.oil === 'Blackened' ? 'selected' : ''}>Blackened</option>
+                </select>
+              </div>
+              <div class="admin-health-item">
+                <label for="health-brakes-${b.id}">🛑 Brakes</label>
+                <select id="health-brakes-${b.id}" class="admin-health-select">
+                  <option value="OK" ${health.brakes === 'OK' ? 'selected' : ''}>OK</option>
+                  <option value="Worn" ${health.brakes === 'Worn' ? 'selected' : ''}>Worn</option>
+                  <option value="Loose" ${health.brakes === 'Loose' ? 'selected' : ''}>Loose</option>
+                </select>
+              </div>
+              <div class="admin-health-item">
+                <label for="health-spark-${b.id}">⚙️ Spark Plug</label>
+                <select id="health-spark-${b.id}" class="admin-health-select">
+                  <option value="Clean" ${health.spark === 'Clean' ? 'selected' : ''}>Clean</option>
+                  <option value="Carbon Blocked" ${health.spark === 'Carbon Blocked' ? 'selected' : ''}>Carbon Blocked</option>
+                  <option value="Replace" ${health.spark === 'Replace' ? 'selected' : ''}>Replace</option>
+                </select>
+              </div>
+              <div class="admin-health-item">
+                <label for="health-chain-${b.id}">🚲 Drive Chain</label>
+                <select id="health-chain-${b.id}" class="admin-health-select">
+                  <option value="Lubricated" ${health.chain === 'Lubricated' ? 'selected' : ''}>Lubricated</option>
+                  <option value="Dry" ${health.chain === 'Dry' ? 'selected' : ''}>Dry</option>
+                  <option value="Needs Adjust" ${health.chain === 'Needs Adjust' ? 'selected' : ''}>Needs Adjust</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-right" style="display: flex; gap: 0.5rem; align-items: flex-end; width: 100%; border-top: 1px solid var(--border-color); padding-top: 1rem; justify-content: flex-end;">
+            <div class="action-item" style="margin-right: 0.5rem; text-align: left;">
               <label for="lang-${b.id}" style="font-size:0.7rem; margin-bottom: 0.25rem;">Language</label>
               <select id="lang-${b.id}" class="input-control" style="width:95px; padding:0.4rem 0.5rem; font-size:0.8rem; background-color: var(--bg-primary);">
                 <option value="hinglish" selected>Hinglish</option>
@@ -370,6 +427,15 @@ async function updateBooking(bookingId) {
   const estimated_cost = parseFloat(document.getElementById(`cost-${bookingId}`).value) || 0;
   const technician_notes = document.getElementById(`notes-${bookingId}`).value.trim();
 
+  // Read diagnostic checklist dropdown values
+  const battery = document.getElementById(`health-battery-${bookingId}`).value;
+  const oil = document.getElementById(`health-oil-${bookingId}`).value;
+  const brakes = document.getElementById(`health-brakes-${bookingId}`).value;
+  const spark = document.getElementById(`health-spark-${bookingId}`).value;
+  const chain = document.getElementById(`health-chain-${bookingId}`).value;
+  
+  const health_report = JSON.stringify({ battery, oil, brakes, spark, chain });
+
   btn.disabled = true;
   btn.textContent = 'Saving...';
 
@@ -383,7 +449,8 @@ async function updateBooking(bookingId) {
       body: JSON.stringify({
         status,
         technician_notes,
-        estimated_cost
+        estimated_cost,
+        health_report // Save structured diagnostic checklist back to server
       })
     });
 

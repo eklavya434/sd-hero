@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initTracker();
   initDefaultDate();
   initZoomModal();
+  initFaqs();
 });
 
 // Toast Helper
@@ -319,6 +320,66 @@ function initTracker() {
         imageBlock.style.display = 'none';
       }
 
+      // Bike Health Diagnostic Report parser
+      const healthCard = document.getElementById('res-health-card');
+      if (booking.health_report && booking.health_report.trim() !== '') {
+        try {
+          const health = JSON.parse(booking.health_report);
+          populateHealthStatus('health-val-battery', health.battery || 'Good');
+          populateHealthStatus('health-val-oil', health.oil || 'Excellent');
+          populateHealthStatus('health-val-brakes', health.brakes || 'OK');
+          populateHealthStatus('health-val-spark', health.spark || 'Clean');
+          populateHealthStatus('health-val-chain', health.chain || 'Lubricated');
+          healthCard.style.display = 'block';
+        } catch (e) {
+          console.error('Failed to parse health report:', e);
+          healthCard.style.display = 'none';
+        }
+      } else {
+        healthCard.style.display = 'none';
+      }
+
+      // Dynamic Customer Loyalty Rewards calculator
+      let totalCompleted = 0;
+      try {
+        const loyaltyRes = await fetch(`/api/bookings/track?query=${encodeURIComponent(booking.phone)}`);
+        const allUserBookings = await loyaltyRes.json();
+        totalCompleted = allUserBookings.filter(b => b.status === 'Completed').length;
+      } catch (e) {
+        console.error('Loyalty count error:', e);
+      }
+
+      const loyaltyCard = document.getElementById('res-loyalty-card');
+      const tierName = document.getElementById('loyalty-tier-name');
+      const loyaltyDesc = document.getElementById('loyalty-desc');
+      const starsIcons = document.getElementById('loyalty-stars-icons');
+
+      if (loyaltyCard && tierName && loyaltyDesc && starsIcons) {
+        let tier = "Welcome Rider";
+        let starsHtml = "★☆☆☆☆";
+        let discountMsg = "Keep servicing with us to unlock VIP discounts!";
+
+        if (totalCompleted >= 5) {
+          tier = "Gold VIP Rider (Level 3)";
+          starsHtml = "★★★★★";
+          discountMsg = "Unlocked: 10% OFF Labor + Free Pressure Wash! 🎁";
+        } else if (totalCompleted >= 3) {
+          tier = "Silver Rider (Level 2)";
+          starsHtml = "★★★☆☆";
+          discountMsg = "Unlocked: Free Bike Polishing on next service! 🌟";
+        } else if (totalCompleted >= 1) {
+          tier = "Bronze Rider (Level 1)";
+          starsHtml = "★☆☆☆☆";
+          discountMsg = "Complete 2 more services to unlock Silver Tier! 🏍️";
+        }
+
+        tierName.textContent = tier;
+        starsIcons.innerHTML = `<span style="color:#ffd700; text-shadow:0 0 10px rgba(255,215,0,0.5); font-family: sans-serif;">${starsHtml}</span>`;
+        document.getElementById('loyalty-count-val').textContent = totalCompleted;
+        loyaltyDesc.innerHTML = `Completed services: <strong>${totalCompleted}</strong>. ${discountMsg}`;
+        loyaltyCard.style.display = 'flex';
+      }
+
       // Dynamic UPI Payment Widget logic
       const paymentCard = document.getElementById('res-payment-card');
       const paymentAmountBtn = document.getElementById('payment-amount-btn');
@@ -502,5 +563,44 @@ function initZoomModal() {
     modalImg.src = imgSrc;
     modal.classList.add('show');
   };
+}
+
+// Collapsible FAQs Accordion toggler logic
+function initFaqs() {
+  const faqItems = document.querySelectorAll('.faq-item');
+  faqItems.forEach(item => {
+    const header = item.querySelector('.faq-header');
+    if (header) {
+      header.addEventListener('click', () => {
+        faqItems.forEach(otherItem => {
+          if (otherItem !== item) {
+            otherItem.classList.remove('active');
+          }
+        });
+        item.classList.toggle('active');
+      });
+    }
+  });
+}
+
+// Colored highlights based on health diagnostics status
+function populateHealthStatus(elemId, status) {
+  const elem = document.getElementById(elemId);
+  if (!elem) return;
+  elem.textContent = status;
+  
+  elem.className = 'health-status-badge';
+  
+  const goodTerms = ['good', 'excellent', 'ok', 'healthy', 'lubricated', 'clean', 'tight', 'adjusted'];
+  const dangerTerms = ['replace', 'worn', 'bad', 'blackened', 'danger'];
+  const statusLower = status.toLowerCase();
+  
+  if (goodTerms.some(term => statusLower.includes(term))) {
+    elem.classList.add('health-good');
+  } else if (dangerTerms.some(term => statusLower.includes(term))) {
+    elem.classList.add('health-danger');
+  } else {
+    elem.classList.add('health-caution');
+  }
 }
 

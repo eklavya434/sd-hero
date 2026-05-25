@@ -177,7 +177,7 @@ app.get('/api/admin/bookings', authenticateAdmin, async (req, res) => {
 app.put('/api/admin/bookings/:id', authenticateAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, technician_notes, estimated_cost } = req.body;
+    const { status, technician_notes, estimated_cost, health_report } = req.body;
 
     if (!status) {
       return res.status(400).json({ error: 'Status is required.' });
@@ -192,9 +192,9 @@ app.put('/api/admin/bookings/:id', authenticateAdmin, async (req, res) => {
 
     await db.run(
       `UPDATE bookings 
-       SET status = ?, technician_notes = ?, estimated_cost = ?
+       SET status = ?, technician_notes = ?, estimated_cost = ?, health_report = ?
        WHERE id = ?`,
-      [status, technician_notes || '', estimated_cost || 0, id]
+      [status, technician_notes || '', estimated_cost || 0, health_report || null, id]
     );
 
     res.json({ success: true, message: 'Booking updated successfully.' });

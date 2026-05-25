@@ -105,9 +105,18 @@ async function initSchema(db) {
       technician_notes TEXT,
       estimated_cost REAL DEFAULT 0,
       vehicle_image TEXT,
+      health_report TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Safe migration to add health_report column if database was already built previously
+  try {
+    await db.exec(`ALTER TABLE bookings ADD COLUMN health_report TEXT`);
+    console.log('✓ Migration: Added health_report column to bookings table');
+  } catch (e) {
+    // Column already exists or table doesn't support it, ignore
+  }
 
   // Create admins table
   await db.exec(`

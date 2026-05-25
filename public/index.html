@@ -224,6 +224,63 @@
     </div>
   </section>
 
+  <!-- Interactive Before/After Gallery -->
+  <section id="gallery-ba" class="section" style="border-top: 1px solid var(--border-color); background-color: var(--bg-secondary);">
+    <div class="container">
+      <div class="section-header">
+        <h2>Visual Proof of Quality</h2>
+        <p>Hover over or tap any card below to see the magic of our specialized cleaning and repair services. We bring old parts back to life!</p>
+      </div>
+      
+      <div class="before-after-grid">
+        <!-- BA Card 1 -->
+        <div class="before-after-card">
+          <div class="ba-image-container">
+            <span class="ba-badge ba-badge-before">Before</span>
+            <span class="ba-badge ba-badge-after">After</span>
+            <img src="images/workshop4.jpg" alt="Dirty Spare Parts" class="ba-img">
+            <img src="images/workshop2.jpg" alt="Clean Service Bay" class="ba-img ba-img-after">
+          </div>
+          <div class="ba-content">
+            <h4>Chain Sprocket & Washing Service</h4>
+            <p>Dirty, rusted, and dry drive chain completely cleaned with carbon solver, washed under pressure, adjusted, and lubed with premium spray.</p>
+            <div class="ba-hover-hint">✨ Hover/Tap to see After</div>
+          </div>
+        </div>
+        
+        <!-- BA Card 2 -->
+        <div class="before-after-card">
+          <div class="ba-image-container">
+            <span class="ba-badge ba-badge-before">Before</span>
+            <span class="ba-badge ba-badge-after">After</span>
+            <img src="images/workshop3.jpg" alt="Exhaust Pipe Mud" class="ba-img">
+            <img src="images/workshop5.jpg" alt="Polished Exhaust Service" class="ba-img ba-img-after">
+          </div>
+          <div class="ba-content">
+            <h4>Exhaust Rust Protection</h4>
+            <p>Exhaust pipe covered in thick mud and exhaust rust, treated with chemical rust dissolves, polished, and coated with high-temp heat resistant paint.</p>
+            <div class="ba-hover-hint">✨ Hover/Tap to see After</div>
+          </div>
+        </div>
+
+        <!-- BA Card 3 -->
+        <div class="before-after-card">
+          <div class="ba-image-container">
+            <span class="ba-badge ba-badge-before">Before</span>
+            <span class="ba-badge ba-badge-after">After</span>
+            <img src="images/workshop1.jpg" alt="Foggy Glass Restorer" class="ba-img">
+            <img src="images/workshop6.jpg" alt="Restored Clear Headlamp" class="ba-img ba-img-after">
+          </div>
+          <div class="ba-content">
+            <h4>Headlamp Lens Restoration</h4>
+            <p>Yellowed, oxidized, and dull headlight lens polished using restoration compound and sealed to return factory-like crystal clear brightness.</p>
+            <div class="ba-hover-hint">✨ Hover/Tap to see After</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Interactive Booking Section -->
   <section id="book" class="section booking-section">
     <div class="container">
@@ -443,6 +500,47 @@
             </div>
           </div>
 
+          <!-- Digital Bike Health Diagnostics Report -->
+          <div id="res-health-card" class="health-card" style="display: none;">
+            <div class="health-card-header">
+              <span>🔧</span> Digital Bike Health Report Card
+            </div>
+            <div class="health-grid">
+              <div class="health-item">
+                <span class="health-label">🔋 Battery Health</span>
+                <span class="health-status-badge" id="health-val-battery">-</span>
+              </div>
+              <div class="health-item">
+                <span class="health-label">🛢️ Engine Oil</span>
+                <span class="health-status-badge" id="health-val-oil">-</span>
+              </div>
+              <div class="health-item">
+                <span class="health-label">🛑 Brakes Condition</span>
+                <span class="health-status-badge" id="health-val-brakes">-</span>
+              </div>
+              <div class="health-item">
+                <span class="health-label">⚙️ Spark Plug</span>
+                <span class="health-status-badge" id="health-val-spark">-</span>
+              </div>
+              <div class="health-item">
+                <span class="health-label">🚲 Chain & Drive</span>
+                <span class="health-status-badge" id="health-val-chain">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Loyalty Rewards Card -->
+          <div id="res-loyalty-card" class="loyalty-card" style="display: none;">
+            <div class="loyalty-info">
+              <div class="loyalty-tier-badge" id="loyalty-tier-name">Welcome Rider</div>
+              <h4 style="margin: 0; color: #fff;">SD Hero Loyalty Rewards</h4>
+              <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--text-secondary);" id="loyalty-desc">Completed services: <span id="loyalty-count-val">0</span>. Keep servicing with us to unlock VIP discounts!</p>
+            </div>
+            <div class="loyalty-stars" id="loyalty-stars-icons">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
           <!-- Dynamic Payment Card Widget -->
           <div id="res-payment-card" class="payment-widget" style="display: none;">
             <div class="payment-widget-header">
@@ -476,6 +574,106 @@
           <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">🔍</span>
           <h4>No bookings found for the entered query.</h4>
           <p style="font-size: 0.9rem; margin-top: 0.5rem;">Double check your Booking ID (e.g. SDH-W8A9B2) or phone number and try again.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Service Tips / Blog Section -->
+  <section id="tips" class="section" style="border-top: 1px solid var(--border-color); background-color: var(--bg-primary);">
+    <div class="container">
+      <div class="section-header">
+        <h2>Expert Maintenance Tips</h2>
+        <p>Keep your motorcycle or scooter in perfect shape between services with these simple, practical tips from our master mechanic.</p>
+      </div>
+
+      <div class="tips-grid">
+        <div class="tips-card">
+          <div class="tips-img-box">
+            <span class="tips-tag">Engine Care</span>
+            <img src="images/workshop2.jpg" alt="Engine Oil" class="tips-img">
+          </div>
+          <div class="tips-content">
+            <h4>How to Check & Top Up Engine Oil</h4>
+            <p>Running on low or dirty oil is the #1 cause of engine damage. Learn how to check your dipstick level and top up with genuine lubricants at home.</p>
+            <a href="#" class="tips-readmore" onclick="showToast('Rider Tip: Check engine oil every 1000km and keep it between the dipstick marks!', 'info'); return false;">Read Tip ➔</a>
+          </div>
+        </div>
+
+        <div class="tips-card">
+          <div class="tips-img-box">
+            <span class="tips-tag">Monsoon Care</span>
+            <img src="images/workshop5.jpg" alt="Monsoon Maintenance" class="tips-img">
+          </div>
+          <div class="tips-content">
+            <h4>Biker Care Tips for Patna Monsoons</h4>
+            <p>Water seepage can block spark plugs and rust drive chains. Spray WD-40 on electrical switches and clean your chain every 500km in the rainy season.</p>
+            <a href="#" class="tips-readmore" onclick="showToast('Rider Tip: Cover spark plugs and avoid parking in waterlogged Lohanipur streets!', 'info'); return false;">Read Tip ➔</a>
+          </div>
+        </div>
+
+        <div class="tips-card">
+          <div class="tips-img-box">
+            <span class="tips-tag">Tires & Brakes</span>
+            <img src="images/workshop3.jpg" alt="Bike Brakes" class="tips-img">
+          </div>
+          <div class="tips-content">
+            <h4>Improving Brake Bite & Tyre Grip</h4>
+            <p>Ensure your drum brakes are adjusted and brake fluid level is clear. Maintain 25 PSI front and 35 PSI rear tyre pressure for peak mileage and grip.</p>
+            <a href="#" class="tips-readmore" onclick="showToast('Rider Tip: Visually inspect brake shoe wear indicators every month!', 'info'); return false;">Read Tip ➔</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Collapsible FAQ Accordion Section -->
+  <section id="faq" class="section" style="border-top: 1px solid var(--border-color); background-color: var(--bg-secondary);">
+    <div class="container">
+      <div class="section-header">
+        <h2>Frequently Asked Questions</h2>
+        <p>Got questions about your 2-wheeler repair? Here are quick, simple answers to general doubts Patna riders ask us.</p>
+      </div>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>❓ How much time does a general servicing take?</span>
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>A standard general servicing, engine tuning, washing, and multi-point checkup takes approximately 2 to 3 hours. If you book your slot in advance, we prioritize your bike for direct consultation and express work.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>❓ Do you use genuine Hero and Honda spare parts?</span>
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>Yes, absolutely! We use only 100% genuine and verified brand spare parts (Hero MotoCorp, Honda, TVS, Castrol, Motul lubricants). We never compromise on replacement parts to ensure your vehicle's longevity and safety.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>❓ Is pickup and drop service available in Lohanipur / Patna?</span>
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>Yes! We offer convenient bike pickup and drop services across Patna (Lohanipur, Kadamkuan, Rajendra Nagar, Exhibition Road, etc.) for a minimal flat charge. You can select the "Pickup & Drop" option while submitting your slot booking.</p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-header">
+            <span>❓ How does the digital tracking and payment work?</span>
+            <span class="faq-icon">▼</span>
+          </div>
+          <div class="faq-answer">
+            <p>Once you submit a booking, you receive a Booking Ref ID (e.g. SDH-W8A9B2). You can enter it on the website to see the live status (Received, Inspecting, Servicing, Ready). When ready, you can view the complete bill and pay directly via GPay, PhonePe, or Paytm with 0% fees!</p>
+          </div>
         </div>
       </div>
     </div>
@@ -561,6 +759,13 @@
       </div>
     </div>
   </footer>
+
+  <!-- Floating WhatsApp Chat Bubble -->
+  <a href="https://wa.me/919334834344?text=Hello%20SD%20Hero%20Service%20Centre%2C%20I%20have%20a%20question%20about%20my%20bike%20servicing." class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp" id="whatsapp-float" title="Direct WhatsApp Help">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" style="display: block;">
+      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.46L0 24zm6.732-4.148l.405.241c1.472.875 3.167 1.336 4.887 1.337 5.568 0 10.099-4.529 10.103-10.102.002-2.699-1.047-5.239-2.951-7.147-1.905-1.905-4.437-2.954-7.14-2.956-5.578 0-10.108 4.53-10.112 10.104-.001 1.8.474 3.56 1.376 5.116l.262.455-1.01 3.693 3.774-1.002z"/>
+    </svg>
+  </a>
 
   <!-- Click-to-Zoom Fullscreen Image Lightbox Modal -->
   <div id="image-zoom-modal" class="zoom-modal">

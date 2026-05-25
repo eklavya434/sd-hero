@@ -673,72 +673,15 @@ function initSuccessModal() {
   });
 }
 
-// WhatsApp Support Live Chat Widget
+// Direct WhatsApp Floating Bubble Widget (Auto-hide Badge on click)
 function initWhatsAppWidget() {
-  const widgetBubble = document.getElementById('wa-chat-bubble');
-  const chatBox = document.getElementById('wa-chat-box');
-  const closeBtn = document.getElementById('wa-chat-box-close');
-  const sendBtn = document.getElementById('wa-btn-send-chat');
-  const chatInput = document.getElementById('wa-chat-input');
-  
-  if (!widgetBubble || !chatBox || !closeBtn || !sendBtn || !chatInput) return;
+  const waBtn = document.getElementById('whatsapp-float-btn');
+  if (!waBtn) return;
 
-  // Set current time in message balloons
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-  const time1 = document.getElementById('wa-msg-time');
-  const time2 = document.getElementById('wa-msg-time-2');
-  if (time1) time1.textContent = timeStr;
-  if (time2) time2.textContent = timeStr;
-
-  // Toggle chatbox display
-  widgetBubble.addEventListener('click', (e) => {
-    e.stopPropagation();
-    chatBox.classList.toggle('show');
-    
-    // Hide notification badge upon opening chat
-    const badge = widgetBubble.querySelector('.wa-badge');
+  waBtn.addEventListener('click', () => {
+    const badge = document.getElementById('wa-badge-notif');
     if (badge) {
       badge.style.display = 'none';
-    }
-  });
-
-  // Minimize chatbox
-  closeBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    chatBox.classList.remove('show');
-  });
-
-  // Prevent closing when clicking inside chat box
-  chatBox.addEventListener('click', (e) => {
-    e.stopPropagation();
-  });
-
-  // Close when clicking anywhere else on page
-  document.addEventListener('click', () => {
-    chatBox.classList.remove('show');
-  });
-
-  // Direct send trigger to WhatsApp
-  function handleSendMessage() {
-    const messageText = chatInput.value.trim();
-    if (!messageText) return;
-
-    const baseText = `Hello Sanjay, I have a query from the S.D. Hero website:\n\n"${messageText}"`;
-    const waUrl = `https://wa.me/919334834344?text=${encodeURIComponent(baseText)}`;
-    
-    window.open(waUrl, '_blank');
-    chatInput.value = '';
-    chatBox.classList.remove('show');
-  }
-
-  sendBtn.addEventListener('click', handleSendMessage);
-
-  // Send when pressing Enter in textarea (but allow shift+enter for new line)
-  chatInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
     }
   });
 }

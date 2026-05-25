@@ -1585,51 +1585,13 @@ try {
     &lt;/div&gt;
   &lt;/footer&gt;
 
-  &lt;!-- Interactive WhatsApp Support Chat Widget --&gt;
-  &lt;div class=&quot;wa-chat-widget&quot; id=&quot;wa-chat-widget&quot;&gt;
-    &lt;!-- Pulsing Float Bubble with notification badge &#039;1&#039; --&gt;
-    &lt;button class=&quot;wa-chat-bubble&quot; id=&quot;wa-chat-bubble&quot; aria-label=&quot;Open WhatsApp Chat&quot; title=&quot;Chat with Sanjay Sinha&quot;&gt;
-      &lt;span class=&quot;wa-badge&quot;&gt;1&lt;/span&gt;
-      &lt;svg width=&quot;28&quot; height=&quot;28&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;currentColor&quot;&gt;
-        &lt;path d=&quot;M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.46L0 24zm6.732-4.148l.405.241c1.472.875 3.167 1.336 4.887 1.337 5.568 0 10.099-4.529 10.103-10.102.002-2.699-1.047-5.239-2.951-7.147-1.905-1.905-4.437-2.954-7.14-2.956-5.578 0-10.108 4.53-10.112 10.104-.001 1.8.474 3.56 1.376 5.116l.262.455-1.01 3.693 3.774-1.002z&quot;/&gt;
-      &lt;/svg&gt;
-    &lt;/button&gt;
-
-    &lt;!-- Support Chat Window Box (Hidden by default, toggles on click) --&gt;
-    &lt;div class=&quot;wa-chat-box&quot; id=&quot;wa-chat-box&quot;&gt;
-      &lt;!-- Header --&gt;
-      &lt;div class=&quot;wa-chat-header&quot;&gt;
-        &lt;div class=&quot;wa-chat-avatar&quot;&gt;🏍️&lt;/div&gt;
-        &lt;div class=&quot;wa-chat-header-text&quot;&gt;
-          &lt;h4&gt;Sanjay Sinha&lt;/h4&gt;
-          &lt;p&gt;&lt;span class=&quot;wa-online-dot&quot;&gt;&lt;/span&gt; Lead Mechanic (S.D. Hero)&lt;/p&gt;
-        &lt;/div&gt;
-        &lt;button class=&quot;wa-chat-close&quot; id=&quot;wa-chat-box-close&quot; title=&quot;Minimize Chat&quot;&gt;✕&lt;/button&gt;
-      &lt;/div&gt;
-      
-      &lt;!-- Body Message Thread --&gt;
-      &lt;div class=&quot;wa-chat-body&quot;&gt;
-        &lt;div class=&quot;wa-msg wa-msg-received&quot;&gt;
-          &lt;p&gt;Namaste! 🙏 Welcome to S.D. Hero Service Centre Patna.&lt;/p&gt;
-          &lt;span class=&quot;wa-msg-time&quot; id=&quot;wa-msg-time&quot;&gt;20:21&lt;/span&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;wa-msg wa-msg-received&quot;&gt;
-          &lt;p&gt;How can I help you with your bike servicing or breakdown repairs today? Type your question below to chat with me directly on WhatsApp! 👇&lt;/p&gt;
-          &lt;span class=&quot;wa-msg-time&quot; id=&quot;wa-msg-time-2&quot;&gt;20:21&lt;/span&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-
-      &lt;!-- Footer Inputs --&gt;
-      &lt;div class=&quot;wa-chat-footer&quot;&gt;
-        &lt;textarea id=&quot;wa-chat-input&quot; class=&quot;wa-chat-input&quot; placeholder=&quot;Type your message here...&quot; rows=&quot;2&quot;&gt;&lt;/textarea&gt;
-        &lt;button id=&quot;wa-btn-send-chat&quot; class=&quot;wa-btn-send-chat&quot; aria-label=&quot;Send message on WhatsApp&quot;&gt;
-          &lt;svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;currentColor&quot;&gt;
-            &lt;path d=&quot;M2.01 21L23 12 2.01 3 2 10l15 2-15 2z&quot;/&gt;
-          &lt;/svg&gt;
-        &lt;/button&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
+  &lt;!-- Direct Floating WhatsApp Redirect Button with Pulsing Notification Badge --&gt;
+  &lt;a href=&quot;https://wa.me/919334834344?text=Hello%20S.D.%20Hero%20Service%20Centre%2C%20I%20have%20a%20question%20about%20my%20bike%20servicing.&quot; class=&quot;whatsapp-float&quot; target=&quot;_blank&quot; aria-label=&quot;Chat on WhatsApp&quot; id=&quot;whatsapp-float-btn&quot; title=&quot;Direct WhatsApp Help&quot;&gt;
+    &lt;span class=&quot;wa-badge&quot; id=&quot;wa-badge-notif&quot;&gt;1&lt;/span&gt;
+    &lt;svg width=&quot;30&quot; height=&quot;30&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;currentColor&quot;&gt;
+      &lt;path d=&quot;M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.46L0 24zm6.732-4.148l.405.241c1.472.875 3.167 1.336 4.887 1.337 5.568 0 10.099-4.529 10.103-10.102.002-2.699-1.047-5.239-2.951-7.147-1.905-1.905-4.437-2.954-7.14-2.956-5.578 0-10.108 4.53-10.112 10.104-.001 1.8.474 3.56 1.376 5.116l.262.455-1.01 3.693 3.774-1.002z&quot;/&gt;
+    &lt;/svg&gt;
+  &lt;/a&gt;
 
   &lt;!-- Click-to-Zoom Fullscreen Image Lightbox Modal --&gt;
   &lt;div id=&quot;image-zoom-modal&quot; class=&quot;zoom-modal&quot;&gt;
@@ -5228,72 +5190,15 @@ function initSuccessModal() {
   });
 }
 
-// WhatsApp Support Live Chat Widget
+// Direct WhatsApp Floating Bubble Widget (Auto-hide Badge on click)
 function initWhatsAppWidget() {
-  const widgetBubble = document.getElementById(&#039;wa-chat-bubble&#039;);
-  const chatBox = document.getElementById(&#039;wa-chat-box&#039;);
-  const closeBtn = document.getElementById(&#039;wa-chat-box-close&#039;);
-  const sendBtn = document.getElementById(&#039;wa-btn-send-chat&#039;);
-  const chatInput = document.getElementById(&#039;wa-chat-input&#039;);
-  
-  if (!widgetBubble || !chatBox || !closeBtn || !sendBtn || !chatInput) return;
+  const waBtn = document.getElementById(&#039;whatsapp-float-btn&#039;);
+  if (!waBtn) return;
 
-  // Set current time in message balloons
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString([], { hour: &#039;2-digit&#039;, minute: &#039;2-digit&#039;, hour12: false });
-  const time1 = document.getElementById(&#039;wa-msg-time&#039;);
-  const time2 = document.getElementById(&#039;wa-msg-time-2&#039;);
-  if (time1) time1.textContent = timeStr;
-  if (time2) time2.textContent = timeStr;
-
-  // Toggle chatbox display
-  widgetBubble.addEventListener(&#039;click&#039;, (e) =&gt; {
-    e.stopPropagation();
-    chatBox.classList.toggle(&#039;show&#039;);
-    
-    // Hide notification badge upon opening chat
-    const badge = widgetBubble.querySelector(&#039;.wa-badge&#039;);
+  waBtn.addEventListener(&#039;click&#039;, () =&gt; {
+    const badge = document.getElementById(&#039;wa-badge-notif&#039;);
     if (badge) {
       badge.style.display = &#039;none&#039;;
-    }
-  });
-
-  // Minimize chatbox
-  closeBtn.addEventListener(&#039;click&#039;, (e) =&gt; {
-    e.stopPropagation();
-    chatBox.classList.remove(&#039;show&#039;);
-  });
-
-  // Prevent closing when clicking inside chat box
-  chatBox.addEventListener(&#039;click&#039;, (e) =&gt; {
-    e.stopPropagation();
-  });
-
-  // Close when clicking anywhere else on page
-  document.addEventListener(&#039;click&#039;, () =&gt; {
-    chatBox.classList.remove(&#039;show&#039;);
-  });
-
-  // Direct send trigger to WhatsApp
-  function handleSendMessage() {
-    const messageText = chatInput.value.trim();
-    if (!messageText) return;
-
-    const baseText = `Hello Sanjay, I have a query from the S.D. Hero website:\n\n&quot;${messageText}&quot;`;
-    const waUrl = `https://wa.me/919334834344?text=${encodeURIComponent(baseText)}`;
-    
-    window.open(waUrl, &#039;_blank&#039;);
-    chatInput.value = &#039;&#039;;
-    chatBox.classList.remove(&#039;show&#039;);
-  }
-
-  sendBtn.addEventListener(&#039;click&#039;, handleSendMessage);
-
-  // Send when pressing Enter in textarea (but allow shift+enter for new line)
-  chatInput.addEventListener(&#039;keydown&#039;, (e) =&gt; {
-    if (e.key === &#039;Enter&#039; &amp;&amp; !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
     }
   });
 }

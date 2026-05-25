@@ -104,6 +104,7 @@ async function initSchema(db) {
       status VARCHAR(50) NOT NULL DEFAULT 'Pending',
       technician_notes TEXT,
       estimated_cost REAL DEFAULT 0,
+      vehicle_image TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);

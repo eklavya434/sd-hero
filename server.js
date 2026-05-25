@@ -48,7 +48,7 @@ function authenticateAdmin(req, res, next) {
 // 1. Submit a booking request
 app.post('/api/bookings', async (req, res) => {
   try {
-    const { customerName, phone, vehicleBrand, vehicleModel, serviceType, description, bookingDate } = req.body;
+    const { customerName, phone, vehicleBrand, vehicleModel, serviceType, description, bookingDate, vehicleImage } = req.body;
 
     if (!customerName || !phone || !vehicleBrand || !vehicleModel || !serviceType || !bookingDate) {
       return res.status(400).json({ error: 'All fields except description are required.' });
@@ -58,9 +58,9 @@ app.post('/api/bookings', async (req, res) => {
     const id = generateBookingId();
 
     await db.run(
-      `INSERT INTO bookings (id, customer_name, phone, vehicle_brand, vehicle_model, service_type, description, booking_date)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, customerName, phone, vehicleBrand, vehicleModel, serviceType, description || '', bookingDate]
+      `INSERT INTO bookings (id, customer_name, phone, vehicle_brand, vehicle_model, service_type, description, booking_date, vehicle_image)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, customerName, phone, vehicleBrand, vehicleModel, serviceType, description || '', bookingDate, vehicleImage || null]
     );
 
     res.status(201).json({

@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initBookingForm();
   initTracker();
   initDefaultDate();
+  initZoomModal();
 });
 
 // Toast Helper
@@ -144,6 +145,48 @@ function initBookingForm() {
   const form = document.getElementById('booking-form');
   if (!form) return;
 
+  const fileInput = document.getElementById('vehicleImageFile');
+  const previewContainer = document.getElementById('booking-image-preview-container');
+  const previewImage = document.getElementById('booking-image-preview');
+  const btnRemove = document.getElementById('btn-remove-image');
+
+  let selectedVehicleBase64 = null;
+
+  // Handle File Input Change (Compress client-side instantly)
+  if (fileInput) {
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        previewImage.src = '';
+        previewContainer.style.display = 'none';
+        
+        // Show loading state by text hint if wanted, or just run
+        const compressedBase64 = await compressAndBase64(file);
+        selectedVehicleBase64 = compressedBase64;
+        
+        previewImage.src = compressedBase64;
+        previewContainer.style.display = 'block';
+      } catch (err) {
+        console.error('Image compression error:', err);
+        showToast('Failed to process image. Please try a different photo.', 'error');
+        fileInput.value = '';
+        selectedVehicleBase64 = null;
+      }
+    });
+  }
+
+  // Handle Remove Image Preview
+  if (btnRemove) {
+    btnRemove.addEventListener('click', () => {
+      if (fileInput) fileInput.value = '';
+      selectedVehicleBase64 = null;
+      previewImage.src = '';
+      previewContainer.style.display = 'none';
+    });
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -158,7 +201,8 @@ function initBookingForm() {
       vehicleModel: document.getElementById('vehicleModel').value.trim(),
       serviceType: document.getElementById('serviceType').value,
       bookingDate: document.getElementById('bookingDate').value,
-      description: document.getElementById('description').value.trim()
+      description: document.getElementById('description').value.trim(),
+      vehicleImage: selectedVehicleBase64 // Insert compressed Base64 image
     };
 
     try {
@@ -175,6 +219,9 @@ function initBookingForm() {
       if (response.ok && data.success) {
         showToast(`Booking Successful! Your ID: ${data.bookingId}`, 'success');
         form.reset();
+        if (previewContainer) previewContainer.style.display = 'none';
+        if (previewImage) previewImage.src = '';
+        selectedVehicleBase64 = null;
         initDefaultDate();
 
         // Automatically populate tracker and scroll
@@ -254,6 +301,51 @@ function initTracker() {
         notesBlock.style.display = 'block';
       } else {
         notesBlock.style.display = 'none';
+      }
+
+      // Vehicle Image rendering
+      const imageBlock = document.getElementById('res-image-block');
+      const vehicleImage = document.getElementById('res-vehicle-image');
+      if (booking.vehicle_image && booking.vehicle_image.trim() !== '') {
+        vehicleImage.src = booking.vehicle_image;
+        imageBlock.style.display = 'block';
+        // Open fullscreen on tap/click
+        vehicleImage.onclick = () => {
+          if (typeof window.openZoomModal === 'function') {
+            window.openZoomModal(booking.vehicle_image);
+          }
+        };
+      } else {
+        imageBlock.style.display = 'none';
+      }
+
+      // Dynamic UPI Payment Widget logic
+      const paymentCard = document.getElementById('res-payment-card');
+      const paymentAmountBtn = document.getElementById('payment-amount-btn');
+      const paymentQrImg = document.getElementById('payment-qr-img');
+      const upiBtn = document.getElementById('btn-upi-intent');
+
+      // Show payment card ONLY if status is 'Ready for Delivery' or 'Completed' AND estimated_cost > 0
+      if ((booking.status === 'Ready for Delivery' || booking.status === 'Completed') && (booking.estimated_cost && booking.estimated_cost > 0)) {
+        paymentAmountBtn.textContent = booking.estimated_cost;
+        
+        // Dynamic zero-fee Indian UPI parameters
+        const shopUpi = '9334834344@ybl'; // Patna shop owner's UPI handle
+        const payeeName = encodeURIComponent('S.D. Hero Service');
+        const txNote = encodeURIComponent(`Repair bill for booking ${booking.id}`);
+        const upiString = `upi://pay?pa=${shopUpi}&pn=${payeeName}&am=${booking.estimated_cost}&cu=INR&tn=${txNote}`;
+        
+        // Set QR code image using public rendering API
+        paymentQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(upiString)}`;
+        
+        // Deep-linking intent for mobile redirect (Instant Pay)
+        upiBtn.onclick = () => {
+          window.location.href = upiString;
+        };
+        
+        paymentCard.style.display = 'block';
+      } else {
+        paymentCard.style.display = 'none';
       }
 
       // Update badge
@@ -343,5 +435,72 @@ function initTracker() {
       document.getElementById('track').scrollIntoView({ behavior: 'smooth' });
     }, 300);
   }
+}
+
+// Client-side Image compression helper using HTML5 Canvas
+function compressAndBase64(file, maxWidth = 800, maxHeight = 800, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Downscale while maintaining proportions
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert canvas image to Base64 JPEG string
+        const base64Data = canvas.toDataURL('image/jpeg', quality);
+        resolve(base64Data);
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+}
+
+// Interactive click-to-zoom fullscreen lightbox setup
+function initZoomModal() {
+  const modal = document.getElementById('image-zoom-modal');
+  const modalImg = document.getElementById('zoom-modal-image');
+  const closeBtn = document.getElementById('btn-close-zoom');
+
+  if (!modal || !modalImg || !closeBtn) return;
+
+  closeBtn.addEventListener('click', () => {
+    modal.classList.remove('show');
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal || e.target === closeBtn) {
+      modal.classList.remove('show');
+    }
+  });
+
+  // Global trigger function to open zoom window from any thumbnail
+  window.openZoomModal = (imgSrc) => {
+    modalImg.src = imgSrc;
+    modal.classList.add('show');
+  };
 }
 

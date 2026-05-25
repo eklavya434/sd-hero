@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSearch();
   initQuickAdd();
   initCSVExport();
+  initAdminZoomModal();
 });
 
 // Toast Helper
@@ -307,6 +308,12 @@ function renderBookings() {
             <p style="font-size:0.9rem; color:var(--text-secondary); line-height:1.4;">
               ${b.description ? b.description : '<span style="color:var(--text-muted); font-style:italic;">No description provided.</span>'}
             </p>
+            ${b.vehicle_image ? `
+            <div class="booking-detail-image-wrapper">
+              <label>Customer Uploaded Photo</label>
+              <img src="${b.vehicle_image}" alt="Customer Uploaded Bike Image" class="booking-image-thumb" onclick="openAdminZoomModal('${b.vehicle_image}')" title="Click to view full screen">
+            </div>
+            ` : ''}
           </div>
         </div>
 
@@ -576,5 +583,30 @@ function initCSVExport() {
     
     showToast('Service Centre database backup downloaded successfully!', 'success');
   });
+}
+
+// Fullscreen Click-to-Zoom Lightbox Overlay Setup for Admin Dashboard
+function initAdminZoomModal() {
+  const modal = document.getElementById('admin-image-zoom-modal');
+  const modalImg = document.getElementById('admin-zoom-modal-image');
+  const closeBtn = document.getElementById('btn-close-admin-zoom');
+
+  if (!modal || !modalImg || !closeBtn) return;
+
+  closeBtn.addEventListener('click', () => {
+    modal.classList.remove('show');
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal || e.target === closeBtn) {
+      modal.classList.remove('show');
+    }
+  });
+
+  // Global trigger function to open fullscreen modal from card thumbnails
+  window.openAdminZoomModal = (imgSrc) => {
+    modalImg.src = imgSrc;
+    modal.classList.add('show');
+  };
 }
 

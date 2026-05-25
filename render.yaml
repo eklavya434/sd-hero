@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: sdhero-service
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    disk:
+      name: sqlite-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: ADMIN_PASSWORD
+        value: 318eklavya
+      - key: JWT_SECRET
+        value: super_secret_key_sdhero_patna

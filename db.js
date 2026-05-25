@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import pg from 'pg';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
@@ -10,48 +11,108 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Detect if running on Render (which defines process.env.RENDER) and use a persistent volume path
-const dbDir = process.env.RENDER ? '/data' : __dirname;
-const dbPath = path.join(dbDir, 'database.sqlite');
+const { Pool } = pg;
 
-let dbConnection = null;
+let dbInstance = null;
+let isPostgres = false;
+
+// Convert SQLite '?' placeholders to PostgreSQL '$1, $2'
+function convertSql(sql) {
+  if (!isPostgres) return sql;
+  let index = 1;
+  return sql.replace(/\?/g, () => `$${index++}`);
+}
+
+class PostgresWrapper {
+  constructor(pool) {
+    this.pool = pool;
+  }
+
+  async exec(sql) {
+    await this.pool.query(sql);
+  }
+
+  async run(sql, params = []) {
+    const pgSql = convertSql(sql);
+    const result = await this.pool.query(pgSql, params);
+    return {
+      lastID: null,
+      changes: result.rowCount
+    };
+  }
+
+  async get(sql, params = []) {
+    const pgSql = convertSql(sql);
+    const result = await this.pool.query(pgSql, params);
+    return result.rows[0];
+  }
+
+  async all(sql, params = []) {
+    const pgSql = convertSql(sql);
+    const result = await this.pool.query(pgSql, params);
+    return result.rows;
+  }
+}
 
 export async function getDb() {
-  if (dbConnection) return dbConnection;
+  if (dbInstance) return dbInstance;
 
-  dbConnection = await open({
-    filename: dbPath,
-    driver: sqlite3.Database
-  });
+  const connectionString = process.env.DATABASE_URL;
 
-  await initSchema(dbConnection);
-  return dbConnection;
+  if (connectionString) {
+    console.log('🔌 Connecting to cloud PostgreSQL database...');
+    isPostgres = true;
+    const pool = new Pool({
+      connectionString: connectionString,
+      ssl: {
+        rejectUnauthorized: false // Required for Render/Neon SSL connections
+      }
+    });
+    
+    // Warm up connection
+    await pool.query('SELECT NOW()');
+    console.log('✓ Cloud PostgreSQL connected successfully!');
+    
+    dbInstance = new PostgresWrapper(pool);
+  } else {
+    console.log('🔌 Connecting to local SQLite database...');
+    isPostgres = false;
+    const dbPath = path.join(__dirname, 'database.sqlite');
+    const sqliteDb = await open({
+      filename: dbPath,
+      driver: sqlite3.Database
+    });
+    dbInstance = sqliteDb;
+  }
+
+  await initSchema(dbInstance);
+  return dbInstance;
 }
 
 async function initSchema(db) {
   // Create bookings table
   await db.exec(`
     CREATE TABLE IF NOT EXISTS bookings (
-      id TEXT PRIMARY KEY,
-      customer_name TEXT NOT NULL,
-      phone TEXT NOT NULL,
-      vehicle_brand TEXT NOT NULL,
-      vehicle_model TEXT NOT NULL,
-      service_type TEXT NOT NULL,
+      id VARCHAR(50) PRIMARY KEY,
+      customer_name VARCHAR(100) NOT NULL,
+      phone VARCHAR(20) NOT NULL,
+      vehicle_brand VARCHAR(50) NOT NULL,
+      vehicle_model VARCHAR(50) NOT NULL,
+      service_type VARCHAR(100) NOT NULL,
       description TEXT,
-      booking_date TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'Pending',
+      booking_date VARCHAR(20) NOT NULL,
+      status VARCHAR(50) NOT NULL DEFAULT 'Pending',
       technician_notes TEXT,
       estimated_cost REAL DEFAULT 0,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
   // Create admins table
   await db.exec(`
     CREATE TABLE IF NOT EXISTS admins (
-      username TEXT PRIMARY KEY,
-      password_hash TEXT NOT NULL
+      username VARCHAR(50) PRIMARY KEY,
+      password_hash VARCHAR(255) NOT NULL
     )
   `);
 
@@ -69,7 +130,7 @@ async function initSchema(db) {
 
   // Seed sample bookings only if bookings table is empty
   const bookingCount = await db.get('SELECT COUNT(*) as count FROM bookings');
-  if (bookingCount.count === 0) {
+  if (bookingCount && parseInt(bookingCount.count) === 0) {
     const sampleBookings = [
       {
         id: 'SDH-W8A9B2',
@@ -124,11 +185,10 @@ async function initSchema(db) {
 }
 
 export function generateBookingId() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Avoid easily confused chars like I, O, 0, 1
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let result = 'SDH-';
   for (let i = 0; i < 6; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;
 }
-

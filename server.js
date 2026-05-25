@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import { exec } from 'child_process';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
@@ -212,6 +213,15 @@ try {
     console.log(`  🏍️  SD HERO SERVICE Service Centre API RUNNING ON PORT ${PORT}`);
     console.log(`  🌐  Local URL: http://localhost:${PORT}`);
     console.log(`=======================================================`);
+
+    // Automatically generate the latest PDF/HTML codebase blueprint on startup
+    exec('node scratch/generate_pdf_html.js', (err, stdout, stderr) => {
+      if (err) {
+        console.error('⚠️ Failed to auto-generate codebase blueprint:', err);
+      } else {
+        console.log(stdout.trim());
+      }
+    });
   });
 } catch (err) {
   console.error('Database connection failed. Server cannot start.', err);

@@ -5,8 +5,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Absolute path to the workspace root
-const workspaceRoot = 'c:/Users/eklav/Downloads/sdhero';
+// Absolute path to the workspace root, determined dynamically
+const workspaceRoot = path.resolve(__dirname, '..');
 
 function getFileContent(relativePath) {
   const fullPath = path.join(workspaceRoot, relativePath);
@@ -148,43 +148,89 @@ const htmlOutput = `<!DOCTYPE html>
     /* Print Styles to compile perfectly as a PDF */
     @media print {
       body {
-        background-color: #fff;
-        color: #000;
+        background-color: #fff !important;
+        color: #000 !important;
         padding: 0;
+        margin: 1cm;
+        font-size: 10pt;
+      }
+      .container {
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      header {
+        border-bottom: 3px solid #000;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        page-break-after: avoid;
+      }
+      header h1 {
+        color: #000;
+        font-size: 20pt;
+      }
+      header p {
+        color: #444;
+        font-size: 11pt;
       }
       .print-hint {
-        display: none;
+        display: none !important;
       }
       .section-card {
-        background-color: #fff;
-        border: none;
-        box-shadow: none;
-        padding: 0;
-        margin-bottom: 4rem;
-        page-break-inside: avoid;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin-bottom: 2.5rem !important;
+        page-break-before: always; /* Start each file on a fresh page */
+        page-break-inside: auto !important; /* Allow files to break across pages naturally */
+      }
+      /* First section card (Goals) doesn't need a page break before */
+      .section-card:first-of-type {
+        page-break-before: avoid;
       }
       .section-card h2 {
-        color: #000;
-        border-bottom: 2px solid #000;
+        color: #000 !important;
+        border-bottom: 2px solid #000 !important;
+        font-size: 14pt;
+        margin-top: 0;
+        padding-bottom: 0.5rem;
+        page-break-after: avoid; /* Prevent header from being stranded */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
       }
       .section-card h2 span.path {
-        color: #000;
-        background-color: #f0f0f0;
-        border: 1px solid #ccc;
-      }
-      pre {
-        background-color: #fcfcfc;
-        border: 1px solid #ddd;
-        page-break-inside: auto;
-      }
-      code {
-        color: #000;
-        white-space: pre-wrap; /* Wrap lines in printed PDF */
+        color: #000 !important;
+        background-color: #eee !important;
+        border: 1px solid #aaa !important;
+        font-size: 9pt;
+        padding: 0.1rem 0.5rem;
       }
       .prompt-box {
-        background-color: #fcfcfc;
-        border-left-color: #000;
-        color: #000;
+        background-color: #fafafa !important;
+        border-left: 4px solid #000 !important;
+        color: #000 !important;
+        padding: 1rem !important;
+        font-size: 9.5pt;
+        page-break-inside: avoid;
+      }
+      pre {
+        background-color: #fafafa !important;
+        border: 1px solid #ddd !important;
+        padding: 1rem !important;
+        margin: 1rem 0 0 0 !important;
+        page-break-inside: auto !important; /* Allow code blocks to split */
+        overflow: visible !important;
+      }
+      code {
+        font-family: var(--font-code);
+        font-size: 7.5pt !important; /* Slightly smaller for density and readability */
+        color: #000 !important;
+        white-space: pre-wrap !important; /* Wrap lines in printed PDF */
+        word-wrap: break-word !important;
+        word-break: break-all !important;
       }
     }
   </style>
@@ -204,6 +250,18 @@ const htmlOutput = `<!DOCTYPE html>
     <div class="section-card">
       <h2>📋 Business Blueprint Goals</h2>
       <div class="prompt-box">${escapeHtml(promptText)}</div>
+    </div>
+
+    <!-- 1.1 package.json -->
+    <div class="section-card">
+      <h2>📦 Project Config <span class="path">package.json</span></h2>
+      <pre><code>${escapeHtml(getFileContent('package.json'))}</code></pre>
+    </div>
+
+    <!-- 1.2 render.yaml -->
+    <div class="section-card">
+      <h2>☁️ Cloud Service Spec <span class="path">render.yaml</span></h2>
+      <pre><code>${escapeHtml(getFileContent('render.yaml'))}</code></pre>
     </div>
 
     <!-- 2. db.js -->

@@ -1585,12 +1585,51 @@ try {
     &lt;/div&gt;
   &lt;/footer&gt;
 
-  &lt;!-- Floating WhatsApp Chat Bubble --&gt;
-  &lt;a href=&quot;https://wa.me/919334834344?text=Hello%20SD%20Hero%20Service%20Centre%2C%20I%20have%20a%20question%20about%20my%20bike%20servicing.&quot; class=&quot;whatsapp-float&quot; target=&quot;_blank&quot; aria-label=&quot;Chat on WhatsApp&quot; id=&quot;whatsapp-float&quot; title=&quot;Direct WhatsApp Help&quot;&gt;
-    &lt;svg width=&quot;30&quot; height=&quot;30&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;currentColor&quot; style=&quot;display: block;&quot;&gt;
-      &lt;path d=&quot;M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.46L0 24zm6.732-4.148l.405.241c1.472.875 3.167 1.336 4.887 1.337 5.568 0 10.099-4.529 10.103-10.102.002-2.699-1.047-5.239-2.951-7.147-1.905-1.905-4.437-2.954-7.14-2.956-5.578 0-10.108 4.53-10.112 10.104-.001 1.8.474 3.56 1.376 5.116l.262.455-1.01 3.693 3.774-1.002z&quot;/&gt;
-    &lt;/svg&gt;
-  &lt;/a&gt;
+  &lt;!-- Interactive WhatsApp Support Chat Widget --&gt;
+  &lt;div class=&quot;wa-chat-widget&quot; id=&quot;wa-chat-widget&quot;&gt;
+    &lt;!-- Pulsing Float Bubble with notification badge &#039;1&#039; --&gt;
+    &lt;button class=&quot;wa-chat-bubble&quot; id=&quot;wa-chat-bubble&quot; aria-label=&quot;Open WhatsApp Chat&quot; title=&quot;Chat with Sanjay Sinha&quot;&gt;
+      &lt;span class=&quot;wa-badge&quot;&gt;1&lt;/span&gt;
+      &lt;svg width=&quot;28&quot; height=&quot;28&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;currentColor&quot;&gt;
+        &lt;path d=&quot;M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.46L0 24zm6.732-4.148l.405.241c1.472.875 3.167 1.336 4.887 1.337 5.568 0 10.099-4.529 10.103-10.102.002-2.699-1.047-5.239-2.951-7.147-1.905-1.905-4.437-2.954-7.14-2.956-5.578 0-10.108 4.53-10.112 10.104-.001 1.8.474 3.56 1.376 5.116l.262.455-1.01 3.693 3.774-1.002z&quot;/&gt;
+      &lt;/svg&gt;
+    &lt;/button&gt;
+
+    &lt;!-- Support Chat Window Box (Hidden by default, toggles on click) --&gt;
+    &lt;div class=&quot;wa-chat-box&quot; id=&quot;wa-chat-box&quot;&gt;
+      &lt;!-- Header --&gt;
+      &lt;div class=&quot;wa-chat-header&quot;&gt;
+        &lt;div class=&quot;wa-chat-avatar&quot;&gt;🏍️&lt;/div&gt;
+        &lt;div class=&quot;wa-chat-header-text&quot;&gt;
+          &lt;h4&gt;Sanjay Sinha&lt;/h4&gt;
+          &lt;p&gt;&lt;span class=&quot;wa-online-dot&quot;&gt;&lt;/span&gt; Lead Mechanic (S.D. Hero)&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;button class=&quot;wa-chat-close&quot; id=&quot;wa-chat-box-close&quot; title=&quot;Minimize Chat&quot;&gt;✕&lt;/button&gt;
+      &lt;/div&gt;
+      
+      &lt;!-- Body Message Thread --&gt;
+      &lt;div class=&quot;wa-chat-body&quot;&gt;
+        &lt;div class=&quot;wa-msg wa-msg-received&quot;&gt;
+          &lt;p&gt;Namaste! 🙏 Welcome to S.D. Hero Service Centre Patna.&lt;/p&gt;
+          &lt;span class=&quot;wa-msg-time&quot; id=&quot;wa-msg-time&quot;&gt;20:21&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;wa-msg wa-msg-received&quot;&gt;
+          &lt;p&gt;How can I help you with your bike servicing or breakdown repairs today? Type your question below to chat with me directly on WhatsApp! 👇&lt;/p&gt;
+          &lt;span class=&quot;wa-msg-time&quot; id=&quot;wa-msg-time-2&quot;&gt;20:21&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;!-- Footer Inputs --&gt;
+      &lt;div class=&quot;wa-chat-footer&quot;&gt;
+        &lt;textarea id=&quot;wa-chat-input&quot; class=&quot;wa-chat-input&quot; placeholder=&quot;Type your message here...&quot; rows=&quot;2&quot;&gt;&lt;/textarea&gt;
+        &lt;button id=&quot;wa-btn-send-chat&quot; class=&quot;wa-btn-send-chat&quot; aria-label=&quot;Send message on WhatsApp&quot;&gt;
+          &lt;svg width=&quot;20&quot; height=&quot;20&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;currentColor&quot;&gt;
+            &lt;path d=&quot;M2.01 21L23 12 2.01 3 2 10l15 2-15 2z&quot;/&gt;
+          &lt;/svg&gt;
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
 
   &lt;!-- Click-to-Zoom Fullscreen Image Lightbox Modal --&gt;
   &lt;div id=&quot;image-zoom-modal&quot; class=&quot;zoom-modal&quot;&gt;
@@ -3536,51 +3575,275 @@ footer {
 }
 
 /* ==========================================================================
-   FLOATING WHATSAPP CHAT ASSISTANCE WIDGET
+   INTERACTIVE WHATSAPP SUPPORT CHAT WIDGET
    ========================================================================== */
 
-.whatsapp-float {
+.wa-chat-widget {
   position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  background-color: #25d366;
-  color: #fff !important;
-  border-radius: 50%;
+  bottom: 30px;
+  right: 30px;
+  z-index: 2900;
+  font-family: var(--font-body);
+}
+
+.wa-chat-bubble {
   width: 60px;
   height: 60px;
+  background-color: #25d366;
+  border: none;
+  border-radius: var(--radius-full);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
-  z-index: 99999;
-  transition: all var(--transition-normal);
-  animation: pulseWhatsApp 2s infinite;
+  transition: transform var(--transition-fast), background-color var(--transition-fast);
+  position: relative;
+  animation: wa-bubble-pulse 2s infinite;
+  outline: none;
 }
 
-.whatsapp-float:hover {
-  transform: scale(1.1) translateY(-3px);
-  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.6);
+.wa-chat-bubble:hover {
+  transform: scale(1.08);
   background-color: #128c7e;
 }
 
-@keyframes pulseWhatsApp {
-  0% {
-    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5);
-  }
-  70% {
-    box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
-  }
+.wa-chat-bubble svg {
+  display: block;
+}
+
+@keyframes wa-bubble-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(37, 211, 102, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 211, 102, 0); }
+}
+
+/* Red Unread Notification Badge */
+.wa-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: #ff3b30;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: var(--radius-full);
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  animation: wa-badge-bounce 1s infinite alternate;
+}
+
+@keyframes wa-badge-bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
+}
+
+/* Chat Box Window Container */
+.wa-chat-box {
+  position: absolute;
+  bottom: 75px;
+  right: 0;
+  width: 350px;
+  max-width: calc(100vw - 40px);
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), 0 10px 40px rgba(0,0,0,0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(20px) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform var(--transition-normal), opacity var(--transition-normal);
+}
+
+.wa-chat-box.show {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Chat Header */
+.wa-chat-header {
+  background: linear-gradient(135deg, #128c7e 0%, #075e54 100%);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  position: relative;
+  text-align: left;
+}
+
+.wa-chat-avatar {
+  width: 42px;
+  height: 42px;
+  background: var(--accent);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.wa-chat-header-text h4 {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  color: #fff;
+  margin: 0;
+  font-weight: 600;
+}
+
+.wa-chat-header-text p {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0.2rem 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.wa-online-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #25d366;
+  border-radius: var(--radius-full);
+  display: inline-block;
+  box-shadow: 0 0 6px #25d366;
+}
+
+.wa-chat-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.wa-chat-close:hover {
+  color: #fff;
+}
+
+/* Chat Body (Message Thread) */
+.wa-chat-body {
+  padding: 1.5rem;
+  max-height: 250px;
+  overflow-y: auto;
+  background: 
+    radial-gradient(circle at top right, rgba(37, 211, 102, 0.03), transparent 60%),
+    rgba(11, 12, 16, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: left;
+}
+
+.wa-msg {
+  max-width: 85%;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-md);
+  position: relative;
+}
+
+.wa-msg-received {
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-top-left-radius: 2px;
+  align-self: flex-start;
+}
+
+.wa-msg p {
+  font-size: 0.88rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.wa-msg-time {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: 0.35rem;
+}
+
+/* Chat Footer (Text Area and Send Button) */
+.wa-chat-footer {
+  padding: 1rem 1.25rem;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.wa-chat-input {
+  flex-grow: 1;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.88rem;
+  font-family: var(--font-body);
+  resize: none;
+  outline: none;
+  transition: border-color var(--transition-fast);
+  height: 42px;
+}
+
+.wa-chat-input:focus {
+  border-color: #25d366;
+}
+
+.wa-btn-send-chat {
+  width: 42px;
+  height: 42px;
+  background-color: #25d366;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.wa-btn-send-chat:hover {
+  background-color: #128c7e;
+  transform: translateY(-2px);
+}
+
+.wa-btn-send-chat svg {
+  margin-left: 2px;
 }
 
 @media (max-width: 768px) {
-  .whatsapp-float {
-    bottom: 1.5rem;
-    right: 1.5rem;
+  .wa-chat-widget {
+    bottom: 20px;
+    right: 20px;
+  }
+  .wa-chat-bubble {
     width: 52px;
     height: 52px;
+  }
+  .wa-chat-box {
+    bottom: 65px;
+    width: 310px;
   }
 }
 
@@ -4304,6 +4567,7 @@ document.addEventListener(&#039;DOMContentLoaded&#039;, () =&gt; {
   initZoomModal();
   initFaqs();
   initSuccessModal();
+  initWhatsAppWidget();
 });
 
 // Toast Helper
@@ -4960,6 +5224,76 @@ function initSuccessModal() {
   modal.addEventListener(&#039;click&#039;, (e) =&gt; {
     if (e.target === modal || e.target === closeBtn) {
       closeAndScroll();
+    }
+  });
+}
+
+// WhatsApp Support Live Chat Widget
+function initWhatsAppWidget() {
+  const widgetBubble = document.getElementById(&#039;wa-chat-bubble&#039;);
+  const chatBox = document.getElementById(&#039;wa-chat-box&#039;);
+  const closeBtn = document.getElementById(&#039;wa-chat-box-close&#039;);
+  const sendBtn = document.getElementById(&#039;wa-btn-send-chat&#039;);
+  const chatInput = document.getElementById(&#039;wa-chat-input&#039;);
+  
+  if (!widgetBubble || !chatBox || !closeBtn || !sendBtn || !chatInput) return;
+
+  // Set current time in message balloons
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: &#039;2-digit&#039;, minute: &#039;2-digit&#039;, hour12: false });
+  const time1 = document.getElementById(&#039;wa-msg-time&#039;);
+  const time2 = document.getElementById(&#039;wa-msg-time-2&#039;);
+  if (time1) time1.textContent = timeStr;
+  if (time2) time2.textContent = timeStr;
+
+  // Toggle chatbox display
+  widgetBubble.addEventListener(&#039;click&#039;, (e) =&gt; {
+    e.stopPropagation();
+    chatBox.classList.toggle(&#039;show&#039;);
+    
+    // Hide notification badge upon opening chat
+    const badge = widgetBubble.querySelector(&#039;.wa-badge&#039;);
+    if (badge) {
+      badge.style.display = &#039;none&#039;;
+    }
+  });
+
+  // Minimize chatbox
+  closeBtn.addEventListener(&#039;click&#039;, (e) =&gt; {
+    e.stopPropagation();
+    chatBox.classList.remove(&#039;show&#039;);
+  });
+
+  // Prevent closing when clicking inside chat box
+  chatBox.addEventListener(&#039;click&#039;, (e) =&gt; {
+    e.stopPropagation();
+  });
+
+  // Close when clicking anywhere else on page
+  document.addEventListener(&#039;click&#039;, () =&gt; {
+    chatBox.classList.remove(&#039;show&#039;);
+  });
+
+  // Direct send trigger to WhatsApp
+  function handleSendMessage() {
+    const messageText = chatInput.value.trim();
+    if (!messageText) return;
+
+    const baseText = `Hello Sanjay, I have a query from the S.D. Hero website:\n\n&quot;${messageText}&quot;`;
+    const waUrl = `https://wa.me/919334834344?text=${encodeURIComponent(baseText)}`;
+    
+    window.open(waUrl, &#039;_blank&#039;);
+    chatInput.value = &#039;&#039;;
+    chatBox.classList.remove(&#039;show&#039;);
+  }
+
+  sendBtn.addEventListener(&#039;click&#039;, handleSendMessage);
+
+  // Send when pressing Enter in textarea (but allow shift+enter for new line)
+  chatInput.addEventListener(&#039;keydown&#039;, (e) =&gt; {
+    if (e.key === &#039;Enter&#039; &amp;&amp; !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
   });
 }

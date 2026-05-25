@@ -848,12 +848,51 @@
     </div>
   </footer>
 
-  <!-- Floating WhatsApp Chat Bubble -->
-  <a href="https://wa.me/919334834344?text=Hello%20SD%20Hero%20Service%20Centre%2C%20I%20have%20a%20question%20about%20my%20bike%20servicing." class="whatsapp-float" target="_blank" aria-label="Chat on WhatsApp" id="whatsapp-float" title="Direct WhatsApp Help">
-    <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" style="display: block;">
-      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.46L0 24zm6.732-4.148l.405.241c1.472.875 3.167 1.336 4.887 1.337 5.568 0 10.099-4.529 10.103-10.102.002-2.699-1.047-5.239-2.951-7.147-1.905-1.905-4.437-2.954-7.14-2.956-5.578 0-10.108 4.53-10.112 10.104-.001 1.8.474 3.56 1.376 5.116l.262.455-1.01 3.693 3.774-1.002z"/>
-    </svg>
-  </a>
+  <!-- Interactive WhatsApp Support Chat Widget -->
+  <div class="wa-chat-widget" id="wa-chat-widget">
+    <!-- Pulsing Float Bubble with notification badge '1' -->
+    <button class="wa-chat-bubble" id="wa-chat-bubble" aria-label="Open WhatsApp Chat" title="Chat with Sanjay Sinha">
+      <span class="wa-badge">1</span>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.46L0 24zm6.732-4.148l.405.241c1.472.875 3.167 1.336 4.887 1.337 5.568 0 10.099-4.529 10.103-10.102.002-2.699-1.047-5.239-2.951-7.147-1.905-1.905-4.437-2.954-7.14-2.956-5.578 0-10.108 4.53-10.112 10.104-.001 1.8.474 3.56 1.376 5.116l.262.455-1.01 3.693 3.774-1.002z"/>
+      </svg>
+    </button>
+
+    <!-- Support Chat Window Box (Hidden by default, toggles on click) -->
+    <div class="wa-chat-box" id="wa-chat-box">
+      <!-- Header -->
+      <div class="wa-chat-header">
+        <div class="wa-chat-avatar">🏍️</div>
+        <div class="wa-chat-header-text">
+          <h4>Sanjay Sinha</h4>
+          <p><span class="wa-online-dot"></span> Lead Mechanic (S.D. Hero)</p>
+        </div>
+        <button class="wa-chat-close" id="wa-chat-box-close" title="Minimize Chat">✕</button>
+      </div>
+      
+      <!-- Body Message Thread -->
+      <div class="wa-chat-body">
+        <div class="wa-msg wa-msg-received">
+          <p>Namaste! 🙏 Welcome to S.D. Hero Service Centre Patna.</p>
+          <span class="wa-msg-time" id="wa-msg-time">20:21</span>
+        </div>
+        <div class="wa-msg wa-msg-received">
+          <p>How can I help you with your bike servicing or breakdown repairs today? Type your question below to chat with me directly on WhatsApp! 👇</p>
+          <span class="wa-msg-time" id="wa-msg-time-2">20:21</span>
+        </div>
+      </div>
+
+      <!-- Footer Inputs -->
+      <div class="wa-chat-footer">
+        <textarea id="wa-chat-input" class="wa-chat-input" placeholder="Type your message here..." rows="2"></textarea>
+        <button id="wa-btn-send-chat" class="wa-btn-send-chat" aria-label="Send message on WhatsApp">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Click-to-Zoom Fullscreen Image Lightbox Modal -->
   <div id="image-zoom-modal" class="zoom-modal">

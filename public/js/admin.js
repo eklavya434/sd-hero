@@ -6,6 +6,11 @@ let allBookings = [];
 let activeFilter = 'all';
 let searchQuery = '';
 
+// Chart.js global instances to avoid overlap bugs
+let statusChartInstance = null;
+let brandChartInstance = null;
+let serviceChartInstance = null;
+
 document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
   initLoginForm();
@@ -15,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initQuickAdd();
   initCSVExport();
   initAdminZoomModal();
+  initPortalTabs();
 });
 
 // Toast Helper
@@ -675,5 +681,282 @@ function initAdminZoomModal() {
     modalImg.src = imgSrc;
     modal.classList.add('show');
   };
+}
+
+// Portal tab navigation switcher
+function initPortalTabs() {
+  const tabBookings = document.getElementById('tab-bookings');
+  const tabAnalytics = document.getElementById('tab-analytics');
+  
+  const statsSection = document.querySelector('.dashboard-stats');
+  const filterSection = document.querySelector('.filter-bar');
+  const quickAddSection = document.getElementById('quick-add-booking');
+  const listSection = document.getElementById('admin-bookings-list').parentNode; // The section containing the list
+  const analyticsSection = document.getElementById('analytics-dashboard-panel');
+
+  if (!tabBookings || !tabAnalytics || !analyticsSection) return;
+
+  tabBookings.addEventListener('click', () => {
+    tabBookings.classList.add('active');
+    tabBookings.style.color = 'var(--accent)';
+    tabBookings.style.borderBottom = '2px solid var(--accent)';
+    
+    tabAnalytics.classList.remove('active');
+    tabAnalytics.style.color = 'var(--text-secondary)';
+    tabAnalytics.style.borderBottom = '2px solid transparent';
+
+    if (statsSection) statsSection.style.display = 'grid';
+    if (filterSection) filterSection.style.display = 'flex';
+    if (quickAddSection) quickAddSection.style.display = 'block';
+    if (listSection) listSection.style.display = 'block';
+    
+    analyticsSection.style.display = 'none';
+  });
+
+  tabAnalytics.addEventListener('click', () => {
+    tabAnalytics.classList.add('active');
+    tabAnalytics.style.color = 'var(--accent)';
+    tabAnalytics.style.borderBottom = '2px solid var(--accent)';
+    
+    tabBookings.classList.remove('active');
+    tabBookings.style.color = 'var(--text-secondary)';
+    tabBookings.style.borderBottom = '2px solid transparent';
+
+    if (statsSection) statsSection.style.display = 'none';
+    if (filterSection) filterSection.style.display = 'none';
+    if (quickAddSection) quickAddSection.style.display = 'none';
+    if (listSection) listSection.style.display = 'none';
+    
+    analyticsSection.style.display = 'block';
+
+    // Render charts
+    renderVisualAnalytics();
+  });
+}
+
+// Render and update Visual Analytics Charts
+function renderVisualAnalytics() {
+  if (allBookings.length === 0) return;
+
+  const totalBookings = allBookings.length;
+  const completedBookings = allBookings.filter(b => b.status === 'Completed');
+  const completedCount = completedBookings.length;
+  
+  const settledRevenue = completedBookings.reduce((sum, b) => sum + (b.estimated_cost || 0), 0);
+  const avgCost = completedCount > 0 ? Math.round(settledRevenue / completedCount) : 0;
+
+  document.getElementById('stat-total-bookings').textContent = totalBookings;
+  document.getElementById('stat-completed-bookings').textContent = completedCount;
+  document.getElementById('stat-completed-revenue').textContent = `₹${settledRevenue}`;
+  document.getElementById('stat-average-ticket').textContent = `₹${avgCost}`;
+
+  const statusCounts = {
+    'Pending': 0,
+    'In Progress': 0,
+    'Ready for Delivery': 0,
+    'Completed': 0
+  };
+  allBookings.forEach(b => {
+    if (statusCounts[b.status] !== undefined) {
+      statusCounts[b.status]++;
+    }
+  });
+
+  const brandCounts = {};
+  allBookings.forEach(b => {
+    const brand = b.vehicle_brand || 'Others';
+    brandCounts[brand] = (brandCounts[brand] || 0) + 1;
+  });
+
+  const serviceCounts = {};
+  allBookings.forEach(b => {
+    const svc = b.service_type || 'Other Repairs';
+    let label = svc.split('&')[0].trim();
+    serviceCounts[label] = (serviceCounts[label] || 0) + 1;
+  });
+
+  const loyaltyData = {};
+  allBookings.forEach(b => {
+    const phone = b.phone;
+    if (!loyaltyData[phone]) {
+      loyaltyData[phone] = {
+        name: b.customer_name,
+        completedCount: 0,
+        totalBookings: 0,
+        model: `${b.vehicle_brand} ${b.vehicle_model}`
+      };
+    }
+    loyaltyData[phone].totalBookings++;
+    if (b.status === 'Completed') {
+      loyaltyData[phone].completedCount++;
+    }
+  });
+
+  const sortedCustomers = Object.keys(loyaltyData)
+    .map(phone => ({ phone, ...loyaltyData[phone] }))
+    .sort((a, b) => b.completedCount - a.completedCount || b.totalBookings - a.totalBookings)
+    .slice(0, 5);
+
+  const loyaltyListContainer = document.getElementById('analytics-loyalty-list');
+  if (loyaltyListContainer) {
+    if (sortedCustomers.length === 0) {
+      loyaltyListContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No customer records yet.</p>`;
+    } else {
+      loyaltyListContainer.innerHTML = sortedCustomers.map((cust, index) => {
+        let stars = '★☆☆☆☆';
+        let tier = 'Welcome Rider';
+        let badgeColor = '#646a78';
+
+        if (cust.completedCount >= 4) {
+          stars = '★★★★★';
+          tier = 'Gold VIP Rider';
+          badgeColor = 'var(--accent)';
+        } else if (cust.completedCount >= 2) {
+          stars = '★★★☆☆';
+          tier = 'Silver Rider';
+          badgeColor = 'var(--status-progress)';
+        } else if (cust.completedCount >= 1) {
+          stars = '★☆☆☆☆';
+          tier = 'Bronze Rider';
+          badgeColor = '#8a6d3b';
+        }
+
+        const rankingEmojis = ['🥇', '🥈', '🥉', '🏍️', '🏍️'];
+        const emoji = rankingEmojis[index] || '🏍️';
+
+        return `
+          <div style="display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-primary); border: 1px solid var(--border-color); padding: 0.85rem 1.25rem; border-radius: var(--radius-md); transition: border-color var(--transition-fast); text-align: left;" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-color)'">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+              <span style="font-size: 1.3rem;">${emoji}</span>
+              <div>
+                <h5 style="margin: 0; color: #fff; font-size: 0.95rem; font-weight: 600;">${cust.name}</h5>
+                <p style="margin: 0.15rem 0 0 0; font-size: 0.75rem; color: var(--text-secondary);">${cust.phone} • ${cust.model}</p>
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <span style="display: inline-block; font-size: 0.72rem; font-weight: 700; color: #fff; background-color: ${badgeColor}; padding: 0.15rem 0.5rem; border-radius: var(--radius-sm); margin-bottom: 0.2rem;">${tier}</span>
+              <p style="margin: 0; font-size: 0.78rem; color: var(--accent); font-weight: 600;">${cust.completedCount} Completed</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  const ctxStatus = document.getElementById('chart-status-distribution').getContext('2d');
+  if (statusChartInstance) statusChartInstance.destroy();
+  
+  statusChartInstance = new Chart(ctxStatus, {
+    type: 'doughnut',
+    data: {
+      labels: ['Pending', 'In Progress', 'Ready', 'Completed'],
+      datasets: [{
+        data: [
+          statusCounts['Pending'],
+          statusCounts['In Progress'],
+          statusCounts['Ready for Delivery'],
+          statusCounts['Completed']
+        ],
+        backgroundColor: [
+          '#ffc107',
+          '#00bcd4',
+          '#4caf50',
+          '#8bc34a'
+        ],
+        borderWidth: 2,
+        borderColor: '#171921'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            color: '#9fa6b5',
+            font: { family: 'Inter', size: 11 }
+          }
+        }
+      }
+    }
+  });
+
+  const ctxBrand = document.getElementById('chart-brand-distribution').getContext('2d');
+  if (brandChartInstance) brandChartInstance.destroy();
+
+  const brandLabels = Object.keys(brandCounts);
+  const brandData = Object.values(brandCounts);
+
+  brandChartInstance = new Chart(ctxBrand, {
+    type: 'bar',
+    data: {
+      labels: brandLabels,
+      datasets: [{
+        label: 'Bikes Serviced',
+        data: brandData,
+        backgroundColor: 'rgba(255, 106, 0, 0.75)',
+        borderColor: 'var(--accent)',
+        borderWidth: 1.5,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: '#9fa6b5', font: { family: 'Inter' } }
+        },
+        y: {
+          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          ticks: { color: '#9fa6b5', stepSize: 1 }
+        }
+      }
+    }
+  });
+
+  const ctxService = document.getElementById('chart-service-distribution').getContext('2d');
+  if (serviceChartInstance) serviceChartInstance.destroy();
+
+  const serviceLabels = Object.keys(serviceCounts);
+  const serviceData = Object.values(serviceCounts);
+
+  serviceChartInstance = new Chart(ctxService, {
+    type: 'bar',
+    data: {
+      labels: serviceLabels,
+      datasets: [{
+        label: 'Requests',
+        data: serviceData,
+        backgroundColor: 'rgba(0, 188, 212, 0.75)',
+        borderColor: '#00bcd4',
+        borderWidth: 1.5,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          ticks: { color: '#9fa6b5', stepSize: 1 }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: '#9fa6b5', font: { family: 'Inter' } }
+        }
+      }
+    }
+  });
 }
 

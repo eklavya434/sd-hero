@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SD Hero Service - Owner Dashboard</title>
   <link rel="stylesheet" href="css/style.css">
+  <!-- Chart.js CDN for Analytics Dashboard -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="admin-login-body" id="body-root">
 
@@ -77,6 +79,16 @@
     <!-- Dashboard Content Area -->
     <main class="admin-content">
       <div class="container">
+        
+        <!-- Portal Nav Tabs for Switching Manager / Analytics -->
+        <div class="portal-nav-tabs" style="display: flex; gap: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 2rem;">
+          <button class="portal-tab active" id="tab-bookings" style="background: transparent; border: none; color: var(--accent); font-family: var(--font-heading); font-size: 1.15rem; font-weight: 700; cursor: pointer; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 2px solid var(--accent); transition: all var(--transition-fast);">
+            📋 Bookings Manager
+          </button>
+          <button class="portal-tab" id="tab-analytics" style="background: transparent; border: none; color: var(--text-secondary); font-family: var(--font-heading); font-size: 1.15rem; font-weight: 700; cursor: pointer; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 2px solid transparent; transition: all var(--transition-fast);">
+            📊 Visual Analytics
+          </button>
+        </div>
         
         <!-- Stats Widgets Row -->
         <section class="dashboard-stats">
@@ -182,6 +194,80 @@
             </div>
           </div>
         </section>
+
+        <!-- Visual Analytics Dashboard Panel (Hidden by default) -->
+        <div id="analytics-dashboard-panel" style="display: none; animation: fadeIn var(--transition-normal); margin-bottom: 3rem;">
+          <!-- Analytics Stats Grid -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+            <div class="dash-stat-card" style="background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(255,106,0,0.05) 100%);">
+              <div class="dash-stat-icon" style="background-color: rgba(255,106,0,0.1); color: var(--accent);">📊</div>
+              <div class="dash-stat-data">
+                <h3 id="stat-total-bookings">0</h3>
+                <p>Total Life Bookings</p>
+              </div>
+            </div>
+            <div class="dash-stat-card" style="background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(139,195,74,0.05) 100%);">
+              <div class="dash-stat-icon" style="background-color: rgba(139,195,74,0.1); color: var(--status-completed); font-size: 1.3rem; width: 45px; height: 45px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center;">🏆</div>
+              <div class="dash-stat-data">
+                <h3 id="stat-completed-bookings">0</h3>
+                <p>Completed Servicings</p>
+              </div>
+            </div>
+            <div class="dash-stat-card" style="background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(0,188,212,0.05) 100%);">
+              <div class="dash-stat-icon" style="background-color: rgba(0,188,212,0.1); color: var(--status-progress);">🪙</div>
+              <div class="dash-stat-data">
+                <h3 id="stat-completed-revenue">₹0</h3>
+                <p>Settled Revenue</p>
+              </div>
+            </div>
+            <div class="dash-stat-card" style="background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(255,193,7,0.05) 100%);">
+              <div class="dash-stat-icon" style="background-color: rgba(255,193,7,0.1); color: var(--status-pending);">⚡</div>
+              <div class="dash-stat-data">
+                <h3 id="stat-average-ticket">₹0</h3>
+                <p>Average Service Cost</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row 1 -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 2.5rem;">
+            <!-- Status Breakdown Chart Container -->
+            <div style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); min-height: 350px; display: flex; flex-direction: column; justify-content: space-between;">
+              <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #fff; margin: 0 0 1.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.75rem; text-align: left;">📋 Service Job Status Breakdown</h4>
+              <div style="position: relative; flex-grow: 1; display: flex; align-items: center; justify-content: center; height: 230px;">
+                <canvas id="chart-status-distribution"></canvas>
+              </div>
+            </div>
+
+            <!-- Brand Breakdown Chart Container -->
+            <div style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); min-height: 350px; display: flex; flex-direction: column; justify-content: space-between;">
+              <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #fff; margin: 0 0 1.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.75rem; text-align: left;">🏍️ Popular Vehicle Brands Serviced</h4>
+              <div style="position: relative; flex-grow: 1; display: flex; align-items: center; justify-content: center; height: 230px;">
+                <canvas id="chart-brand-distribution"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row 2 & Loyalty Leaderboard -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
+            <!-- Service Categories Chart Container -->
+            <div style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); min-height: 380px; display: flex; flex-direction: column; justify-content: space-between;">
+              <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #fff; margin: 0 0 1.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.75rem; text-align: left;">🛠️ Service Categories Popularity</h4>
+              <div style="position: relative; flex-grow: 1; display: flex; align-items: center; justify-content: center; height: 260px;">
+                <canvas id="chart-service-distribution"></canvas>
+              </div>
+            </div>
+
+            <!-- Loyalty Leaderboard Container -->
+            <div style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); min-height: 380px; display: flex; flex-direction: column;">
+              <h4 style="font-family: var(--font-heading); font-size: 1.15rem; color: #fff; margin: 0 0 1.25rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.75rem; text-align: left;">🌟 Customer Loyalty Hall of Fame</h4>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: -0.75rem; margin-bottom: 1.25rem; text-align: left;">Patna's top repeat customers rewarded with glowing loyalty VIP tiers.</p>
+              <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 0.85rem;" id="analytics-loyalty-list">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- Admin QR & Tools Panel for Easy Mobile Access -->
         <section style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: 2.5rem; border-radius: var(--radius-lg); margin-top: 3rem;">

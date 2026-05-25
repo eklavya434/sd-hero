@@ -5216,6 +5216,8 @@ function initWhatsAppWidget() {
   &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
   &lt;title&gt;SD Hero Service - Owner Dashboard&lt;/title&gt;
   &lt;link rel=&quot;stylesheet&quot; href=&quot;css/style.css&quot;&gt;
+  &lt;!-- Chart.js CDN for Analytics Dashboard --&gt;
+  &lt;script src=&quot;https://cdn.jsdelivr.net/npm/chart.js&quot;&gt;&lt;/script&gt;
 &lt;/head&gt;
 &lt;body class=&quot;admin-login-body&quot; id=&quot;body-root&quot;&gt;
 
@@ -5288,6 +5290,16 @@ function initWhatsAppWidget() {
     &lt;!-- Dashboard Content Area --&gt;
     &lt;main class=&quot;admin-content&quot;&gt;
       &lt;div class=&quot;container&quot;&gt;
+        
+        &lt;!-- Portal Nav Tabs for Switching Manager / Analytics --&gt;
+        &lt;div class=&quot;portal-nav-tabs&quot; style=&quot;display: flex; gap: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; margin-bottom: 2rem;&quot;&gt;
+          &lt;button class=&quot;portal-tab active&quot; id=&quot;tab-bookings&quot; style=&quot;background: transparent; border: none; color: var(--accent); font-family: var(--font-heading); font-size: 1.15rem; font-weight: 700; cursor: pointer; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 2px solid var(--accent); transition: all var(--transition-fast);&quot;&gt;
+            📋 Bookings Manager
+          &lt;/button&gt;
+          &lt;button class=&quot;portal-tab&quot; id=&quot;tab-analytics&quot; style=&quot;background: transparent; border: none; color: var(--text-secondary); font-family: var(--font-heading); font-size: 1.15rem; font-weight: 700; cursor: pointer; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 2px solid transparent; transition: all var(--transition-fast);&quot;&gt;
+            📊 Visual Analytics
+          &lt;/button&gt;
+        &lt;/div&gt;
         
         &lt;!-- Stats Widgets Row --&gt;
         &lt;section class=&quot;dashboard-stats&quot;&gt;
@@ -5394,6 +5406,80 @@ function initWhatsAppWidget() {
           &lt;/div&gt;
         &lt;/section&gt;
 
+        &lt;!-- Visual Analytics Dashboard Panel (Hidden by default) --&gt;
+        &lt;div id=&quot;analytics-dashboard-panel&quot; style=&quot;display: none; animation: fadeIn var(--transition-normal); margin-bottom: 3rem;&quot;&gt;
+          &lt;!-- Analytics Stats Grid --&gt;
+          &lt;div style=&quot;display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;&quot;&gt;
+            &lt;div class=&quot;dash-stat-card&quot; style=&quot;background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(255,106,0,0.05) 100%);&quot;&gt;
+              &lt;div class=&quot;dash-stat-icon&quot; style=&quot;background-color: rgba(255,106,0,0.1); color: var(--accent);&quot;&gt;📊&lt;/div&gt;
+              &lt;div class=&quot;dash-stat-data&quot;&gt;
+                &lt;h3 id=&quot;stat-total-bookings&quot;&gt;0&lt;/h3&gt;
+                &lt;p&gt;Total Life Bookings&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;dash-stat-card&quot; style=&quot;background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(139,195,74,0.05) 100%);&quot;&gt;
+              &lt;div class=&quot;dash-stat-icon&quot; style=&quot;background-color: rgba(139,195,74,0.1); color: var(--status-completed); font-size: 1.3rem; width: 45px; height: 45px; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center;&quot;&gt;🏆&lt;/div&gt;
+              &lt;div class=&quot;dash-stat-data&quot;&gt;
+                &lt;h3 id=&quot;stat-completed-bookings&quot;&gt;0&lt;/h3&gt;
+                &lt;p&gt;Completed Servicings&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;dash-stat-card&quot; style=&quot;background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(0,188,212,0.05) 100%);&quot;&gt;
+              &lt;div class=&quot;dash-stat-icon&quot; style=&quot;background-color: rgba(0,188,212,0.1); color: var(--status-progress);&quot;&gt;🪙&lt;/div&gt;
+              &lt;div class=&quot;dash-stat-data&quot;&gt;
+                &lt;h3 id=&quot;stat-completed-revenue&quot;&gt;₹0&lt;/h3&gt;
+                &lt;p&gt;Settled Revenue&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;dash-stat-card&quot; style=&quot;background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(255,193,7,0.05) 100%);&quot;&gt;
+              &lt;div class=&quot;dash-stat-icon&quot; style=&quot;background-color: rgba(255,193,7,0.1); color: var(--status-pending);&quot;&gt;⚡&lt;/div&gt;
+              &lt;div class=&quot;dash-stat-data&quot;&gt;
+                &lt;h3 id=&quot;stat-average-ticket&quot;&gt;₹0&lt;/h3&gt;
+                &lt;p&gt;Average Service Cost&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;!-- Charts Row 1 --&gt;
+          &lt;div style=&quot;display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 2.5rem;&quot;&gt;
+            &lt;!-- Status Breakdown Chart Container --&gt;
+            &lt;div style=&quot;background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); min-height: 350px; display: flex; flex-direction: column; justify-content: space-between;&quot;&gt;
+              &lt;h4 style=&quot;font-family: var(--font-heading); font-size: 1.15rem; color: #fff; margin: 0 0 1.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.75rem; text-align: left;&quot;&gt;📋 Service Job Status Breakdown&lt;/h4&gt;
+              &lt;div style=&quot;position: relative; flex-grow: 1; display: flex; align-items: center; justify-content: center; height: 230px;&quot;&gt;
+                &lt;canvas id=&quot;chart-status-distribution&quot;&gt;&lt;/canvas&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;!-- Brand Breakdown Chart Container --&gt;
+            &lt;div style=&quot;background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); min-height: 350px; display: flex; flex-direction: column; justify-content: space-between;&quot;&gt;
+              &lt;h4 style=&quot;font-family: var(--font-heading); font-size: 1.15rem; color: #fff; margin: 0 0 1.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.75rem; text-align: left;&quot;&gt;🏍️ Popular Vehicle Brands Serviced&lt;/h4&gt;
+              &lt;div style=&quot;position: relative; flex-grow: 1; display: flex; align-items: center; justify-content: center; height: 230px;&quot;&gt;
+                &lt;canvas id=&quot;chart-brand-distribution&quot;&gt;&lt;/canvas&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;!-- Charts Row 2 &amp; Loyalty Leaderboard --&gt;
+          &lt;div style=&quot;display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;&quot;&gt;
+            &lt;!-- Service Categories Chart Container --&gt;
+            &lt;div style=&quot;background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); min-height: 380px; display: flex; flex-direction: column; justify-content: space-between;&quot;&gt;
+              &lt;h4 style=&quot;font-family: var(--font-heading); font-size: 1.15rem; color: #fff; margin: 0 0 1.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.75rem; text-align: left;&quot;&gt;🛠️ Service Categories Popularity&lt;/h4&gt;
+              &lt;div style=&quot;position: relative; flex-grow: 1; display: flex; align-items: center; justify-content: center; height: 260px;&quot;&gt;
+                &lt;canvas id=&quot;chart-service-distribution&quot;&gt;&lt;/canvas&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;!-- Loyalty Leaderboard Container --&gt;
+            &lt;div style=&quot;background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-md); min-height: 380px; display: flex; flex-direction: column;&quot;&gt;
+              &lt;h4 style=&quot;font-family: var(--font-heading); font-size: 1.15rem; color: #fff; margin: 0 0 1.25rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.75rem; text-align: left;&quot;&gt;🌟 Customer Loyalty Hall of Fame&lt;/h4&gt;
+              &lt;p style=&quot;font-size: 0.82rem; color: var(--text-secondary); margin-top: -0.75rem; margin-bottom: 1.25rem; text-align: left;&quot;&gt;Patna&#039;s top repeat customers rewarded with glowing loyalty VIP tiers.&lt;/p&gt;
+              &lt;div style=&quot;flex-grow: 1; display: flex; flex-direction: column; gap: 0.85rem;&quot; id=&quot;analytics-loyalty-list&quot;&gt;
+                &lt;!-- Populated dynamically --&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+
         &lt;!-- Admin QR &amp; Tools Panel for Easy Mobile Access --&gt;
         &lt;section style=&quot;background-color: var(--bg-secondary); border: 1px solid var(--border-color); padding: 2.5rem; border-radius: var(--radius-lg); margin-top: 3rem;&quot;&gt;
           &lt;div class=&quot;section-header&quot; style=&quot;margin-bottom: 2rem; text-align: left;&quot;&gt;
@@ -5466,6 +5552,11 @@ let allBookings = [];
 let activeFilter = &#039;all&#039;;
 let searchQuery = &#039;&#039;;
 
+// Chart.js global instances to avoid overlap bugs
+let statusChartInstance = null;
+let brandChartInstance = null;
+let serviceChartInstance = null;
+
 document.addEventListener(&#039;DOMContentLoaded&#039;, () =&gt; {
   checkAuth();
   initLoginForm();
@@ -5475,6 +5566,7 @@ document.addEventListener(&#039;DOMContentLoaded&#039;, () =&gt; {
   initQuickAdd();
   initCSVExport();
   initAdminZoomModal();
+  initPortalTabs();
 });
 
 // Toast Helper
@@ -6135,6 +6227,283 @@ function initAdminZoomModal() {
     modalImg.src = imgSrc;
     modal.classList.add(&#039;show&#039;);
   };
+}
+
+// Portal tab navigation switcher
+function initPortalTabs() {
+  const tabBookings = document.getElementById(&#039;tab-bookings&#039;);
+  const tabAnalytics = document.getElementById(&#039;tab-analytics&#039;);
+  
+  const statsSection = document.querySelector(&#039;.dashboard-stats&#039;);
+  const filterSection = document.querySelector(&#039;.filter-bar&#039;);
+  const quickAddSection = document.getElementById(&#039;quick-add-booking&#039;);
+  const listSection = document.getElementById(&#039;admin-bookings-list&#039;).parentNode; // The section containing the list
+  const analyticsSection = document.getElementById(&#039;analytics-dashboard-panel&#039;);
+
+  if (!tabBookings || !tabAnalytics || !analyticsSection) return;
+
+  tabBookings.addEventListener(&#039;click&#039;, () =&gt; {
+    tabBookings.classList.add(&#039;active&#039;);
+    tabBookings.style.color = &#039;var(--accent)&#039;;
+    tabBookings.style.borderBottom = &#039;2px solid var(--accent)&#039;;
+    
+    tabAnalytics.classList.remove(&#039;active&#039;);
+    tabAnalytics.style.color = &#039;var(--text-secondary)&#039;;
+    tabAnalytics.style.borderBottom = &#039;2px solid transparent&#039;;
+
+    if (statsSection) statsSection.style.display = &#039;grid&#039;;
+    if (filterSection) filterSection.style.display = &#039;flex&#039;;
+    if (quickAddSection) quickAddSection.style.display = &#039;block&#039;;
+    if (listSection) listSection.style.display = &#039;block&#039;;
+    
+    analyticsSection.style.display = &#039;none&#039;;
+  });
+
+  tabAnalytics.addEventListener(&#039;click&#039;, () =&gt; {
+    tabAnalytics.classList.add(&#039;active&#039;);
+    tabAnalytics.style.color = &#039;var(--accent)&#039;;
+    tabAnalytics.style.borderBottom = &#039;2px solid var(--accent)&#039;;
+    
+    tabBookings.classList.remove(&#039;active&#039;);
+    tabBookings.style.color = &#039;var(--text-secondary)&#039;;
+    tabBookings.style.borderBottom = &#039;2px solid transparent&#039;;
+
+    if (statsSection) statsSection.style.display = &#039;none&#039;;
+    if (filterSection) filterSection.style.display = &#039;none&#039;;
+    if (quickAddSection) quickAddSection.style.display = &#039;none&#039;;
+    if (listSection) listSection.style.display = &#039;none&#039;;
+    
+    analyticsSection.style.display = &#039;block&#039;;
+
+    // Render charts
+    renderVisualAnalytics();
+  });
+}
+
+// Render and update Visual Analytics Charts
+function renderVisualAnalytics() {
+  if (allBookings.length === 0) return;
+
+  const totalBookings = allBookings.length;
+  const completedBookings = allBookings.filter(b =&gt; b.status === &#039;Completed&#039;);
+  const completedCount = completedBookings.length;
+  
+  const settledRevenue = completedBookings.reduce((sum, b) =&gt; sum + (b.estimated_cost || 0), 0);
+  const avgCost = completedCount &gt; 0 ? Math.round(settledRevenue / completedCount) : 0;
+
+  document.getElementById(&#039;stat-total-bookings&#039;).textContent = totalBookings;
+  document.getElementById(&#039;stat-completed-bookings&#039;).textContent = completedCount;
+  document.getElementById(&#039;stat-completed-revenue&#039;).textContent = `₹${settledRevenue}`;
+  document.getElementById(&#039;stat-average-ticket&#039;).textContent = `₹${avgCost}`;
+
+  const statusCounts = {
+    &#039;Pending&#039;: 0,
+    &#039;In Progress&#039;: 0,
+    &#039;Ready for Delivery&#039;: 0,
+    &#039;Completed&#039;: 0
+  };
+  allBookings.forEach(b =&gt; {
+    if (statusCounts[b.status] !== undefined) {
+      statusCounts[b.status]++;
+    }
+  });
+
+  const brandCounts = {};
+  allBookings.forEach(b =&gt; {
+    const brand = b.vehicle_brand || &#039;Others&#039;;
+    brandCounts[brand] = (brandCounts[brand] || 0) + 1;
+  });
+
+  const serviceCounts = {};
+  allBookings.forEach(b =&gt; {
+    const svc = b.service_type || &#039;Other Repairs&#039;;
+    let label = svc.split(&#039;&amp;&#039;)[0].trim();
+    serviceCounts[label] = (serviceCounts[label] || 0) + 1;
+  });
+
+  const loyaltyData = {};
+  allBookings.forEach(b =&gt; {
+    const phone = b.phone;
+    if (!loyaltyData[phone]) {
+      loyaltyData[phone] = {
+        name: b.customer_name,
+        completedCount: 0,
+        totalBookings: 0,
+        model: `${b.vehicle_brand} ${b.vehicle_model}`
+      };
+    }
+    loyaltyData[phone].totalBookings++;
+    if (b.status === &#039;Completed&#039;) {
+      loyaltyData[phone].completedCount++;
+    }
+  });
+
+  const sortedCustomers = Object.keys(loyaltyData)
+    .map(phone =&gt; ({ phone, ...loyaltyData[phone] }))
+    .sort((a, b) =&gt; b.completedCount - a.completedCount || b.totalBookings - a.totalBookings)
+    .slice(0, 5);
+
+  const loyaltyListContainer = document.getElementById(&#039;analytics-loyalty-list&#039;);
+  if (loyaltyListContainer) {
+    if (sortedCustomers.length === 0) {
+      loyaltyListContainer.innerHTML = `&lt;p style=&quot;text-align: center; color: var(--text-muted); padding: 1.5rem;&quot;&gt;No customer records yet.&lt;/p&gt;`;
+    } else {
+      loyaltyListContainer.innerHTML = sortedCustomers.map((cust, index) =&gt; {
+        let stars = &#039;★☆☆☆☆&#039;;
+        let tier = &#039;Welcome Rider&#039;;
+        let badgeColor = &#039;#646a78&#039;;
+
+        if (cust.completedCount &gt;= 4) {
+          stars = &#039;★★★★★&#039;;
+          tier = &#039;Gold VIP Rider&#039;;
+          badgeColor = &#039;var(--accent)&#039;;
+        } else if (cust.completedCount &gt;= 2) {
+          stars = &#039;★★★☆☆&#039;;
+          tier = &#039;Silver Rider&#039;;
+          badgeColor = &#039;var(--status-progress)&#039;;
+        } else if (cust.completedCount &gt;= 1) {
+          stars = &#039;★☆☆☆☆&#039;;
+          tier = &#039;Bronze Rider&#039;;
+          badgeColor = &#039;#8a6d3b&#039;;
+        }
+
+        const rankingEmojis = [&#039;🥇&#039;, &#039;🥈&#039;, &#039;🥉&#039;, &#039;🏍️&#039;, &#039;🏍️&#039;];
+        const emoji = rankingEmojis[index] || &#039;🏍️&#039;;
+
+        return `
+          &lt;div style=&quot;display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-primary); border: 1px solid var(--border-color); padding: 0.85rem 1.25rem; border-radius: var(--radius-md); transition: border-color var(--transition-fast); text-align: left;&quot; onmouseover=&quot;this.style.borderColor=&#039;var(--accent)&#039;&quot; onmouseout=&quot;this.style.borderColor=&#039;var(--border-color)&#039;&quot;&gt;
+            &lt;div style=&quot;display: flex; align-items: center; gap: 0.85rem;&quot;&gt;
+              &lt;span style=&quot;font-size: 1.3rem;&quot;&gt;${emoji}&lt;/span&gt;
+              &lt;div&gt;
+                &lt;h5 style=&quot;margin: 0; color: #fff; font-size: 0.95rem; font-weight: 600;&quot;&gt;${cust.name}&lt;/h5&gt;
+                &lt;p style=&quot;margin: 0.15rem 0 0 0; font-size: 0.75rem; color: var(--text-secondary);&quot;&gt;${cust.phone} • ${cust.model}&lt;/p&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div style=&quot;text-align: right;&quot;&gt;
+              &lt;span style=&quot;display: inline-block; font-size: 0.72rem; font-weight: 700; color: #fff; background-color: ${badgeColor}; padding: 0.15rem 0.5rem; border-radius: var(--radius-sm); margin-bottom: 0.2rem;&quot;&gt;${tier}&lt;/span&gt;
+              &lt;p style=&quot;margin: 0; font-size: 0.78rem; color: var(--accent); font-weight: 600;&quot;&gt;${cust.completedCount} Completed&lt;/p&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+        `;
+      }).join(&#039;&#039;);
+    }
+  }
+
+  const ctxStatus = document.getElementById(&#039;chart-status-distribution&#039;).getContext(&#039;2d&#039;);
+  if (statusChartInstance) statusChartInstance.destroy();
+  
+  statusChartInstance = new Chart(ctxStatus, {
+    type: &#039;doughnut&#039;,
+    data: {
+      labels: [&#039;Pending&#039;, &#039;In Progress&#039;, &#039;Ready&#039;, &#039;Completed&#039;],
+      datasets: [{
+        data: [
+          statusCounts[&#039;Pending&#039;],
+          statusCounts[&#039;In Progress&#039;],
+          statusCounts[&#039;Ready for Delivery&#039;],
+          statusCounts[&#039;Completed&#039;]
+        ],
+        backgroundColor: [
+          &#039;#ffc107&#039;,
+          &#039;#00bcd4&#039;,
+          &#039;#4caf50&#039;,
+          &#039;#8bc34a&#039;
+        ],
+        borderWidth: 2,
+        borderColor: &#039;#171921&#039;
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: &#039;right&#039;,
+          labels: {
+            color: &#039;#9fa6b5&#039;,
+            font: { family: &#039;Inter&#039;, size: 11 }
+          }
+        }
+      }
+    }
+  });
+
+  const ctxBrand = document.getElementById(&#039;chart-brand-distribution&#039;).getContext(&#039;2d&#039;);
+  if (brandChartInstance) brandChartInstance.destroy();
+
+  const brandLabels = Object.keys(brandCounts);
+  const brandData = Object.values(brandCounts);
+
+  brandChartInstance = new Chart(ctxBrand, {
+    type: &#039;bar&#039;,
+    data: {
+      labels: brandLabels,
+      datasets: [{
+        label: &#039;Bikes Serviced&#039;,
+        data: brandData,
+        backgroundColor: &#039;rgba(255, 106, 0, 0.75)&#039;,
+        borderColor: &#039;var(--accent)&#039;,
+        borderWidth: 1.5,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: &#039;#9fa6b5&#039;, font: { family: &#039;Inter&#039; } }
+        },
+        y: {
+          grid: { color: &#039;rgba(255, 255, 255, 0.05)&#039; },
+          ticks: { color: &#039;#9fa6b5&#039;, stepSize: 1 }
+        }
+      }
+    }
+  });
+
+  const ctxService = document.getElementById(&#039;chart-service-distribution&#039;).getContext(&#039;2d&#039;);
+  if (serviceChartInstance) serviceChartInstance.destroy();
+
+  const serviceLabels = Object.keys(serviceCounts);
+  const serviceData = Object.values(serviceCounts);
+
+  serviceChartInstance = new Chart(ctxService, {
+    type: &#039;bar&#039;,
+    data: {
+      labels: serviceLabels,
+      datasets: [{
+        label: &#039;Requests&#039;,
+        data: serviceData,
+        backgroundColor: &#039;rgba(0, 188, 212, 0.75)&#039;,
+        borderColor: &#039;#00bcd4&#039;,
+        borderWidth: 1.5,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: &#039;y&#039;,
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: {
+          grid: { color: &#039;rgba(255, 255, 255, 0.05)&#039; },
+          ticks: { color: &#039;#9fa6b5&#039;, stepSize: 1 }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: &#039;#9fa6b5&#039;, font: { family: &#039;Inter&#039; } }
+        }
+      }
+    }
+  });
 }
 
 </code></pre>

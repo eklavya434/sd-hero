@@ -380,6 +380,16 @@ function initTracker() {
         loyaltyCard.style.display = 'flex';
       }
 
+      // WhatsApp chat trigger regarding this specific booking
+      const waChatBtn = document.getElementById('btn-whatsapp-chat');
+      if (waChatBtn) {
+        waChatBtn.onclick = () => {
+          const shopPhone = '919334834344'; // Patna shop owner mobile
+          const msg = encodeURIComponent(`Hello S.D. Hero Service Centre,\nI have a question about my booking ID: ${booking.id} (${booking.vehicle_brand} ${booking.vehicle_model}).\nMy active service status shows: *${booking.status}*.`);
+          window.open(`https://wa.me/${shopPhone}?text=${msg}`, '_blank');
+        };
+      }
+
       // Dynamic UPI Payment Widget logic
       const paymentCard = document.getElementById('res-payment-card');
       const paymentAmountBtn = document.getElementById('payment-amount-btn');

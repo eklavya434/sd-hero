@@ -809,15 +809,15 @@ function renderVisualAnalytics() {
 
         if (cust.completedCount >= 4) {
           stars = '★★★★★';
-          tier = 'Gold VIP Rider';
+          tier = 'Yaarana VIP';
           badgeColor = 'var(--accent)';
         } else if (cust.completedCount >= 2) {
           stars = '★★★☆☆';
-          tier = 'Silver Rider';
+          tier = 'Milon Ka Yaar';
           badgeColor = 'var(--status-progress)';
         } else if (cust.completedCount >= 1) {
           stars = '★☆☆☆☆';
-          tier = 'Bronze Rider';
+          tier = 'Humsafar Rider';
           badgeColor = '#8a6d3b';
         }
 

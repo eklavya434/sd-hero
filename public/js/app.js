@@ -394,17 +394,17 @@ function initTracker() {
         let discountMsg = "Keep servicing with us to unlock VIP discounts!";
 
         if (totalCompleted >= 5) {
-          tier = "Gold VIP Rider (Level 3)";
+          tier = "Yaarana VIP (Level 3)";
           starsHtml = "★★★★★";
-          discountMsg = "Unlocked: 10% OFF Labor + Free Pressure Wash! 🎁";
+          discountMsg = "Unlocked: 10% OFF Labor + Free Pressure Foam Wash! 🎁";
         } else if (totalCompleted >= 3) {
-          tier = "Silver Rider (Level 2)";
+          tier = "Milon Ka Yaar (Level 2)";
           starsHtml = "★★★☆☆";
-          discountMsg = "Unlocked: Free Bike Polishing on next service! 🌟";
+          discountMsg = "Unlocked: Free Premium Bike Wash & Polishing! 🌟";
         } else if (totalCompleted >= 1) {
-          tier = "Bronze Rider (Level 1)";
+          tier = "Humsafar Rider (Level 1)";
           starsHtml = "★☆☆☆☆";
-          discountMsg = "Complete 2 more services to unlock Silver Tier! 🏍️";
+          discountMsg = "Complete 2 more services to unlock Milon Ka Yaar Tier! 🏍️";
         }
 
         tierName.textContent = tier;

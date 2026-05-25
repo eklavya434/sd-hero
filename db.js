@@ -110,6 +110,14 @@ async function initSchema(db) {
     )
   `);
 
+  // Safe migration to add vehicle_image column if database was already built previously
+  try {
+    await db.exec(`ALTER TABLE bookings ADD COLUMN vehicle_image TEXT`);
+    console.log('✓ Migration: Added vehicle_image column to bookings table');
+  } catch (e) {
+    // Column already exists or table doesn't support it, ignore
+  }
+
   // Safe migration to add health_report column if database was already built previously
   try {
     await db.exec(`ALTER TABLE bookings ADD COLUMN health_report TEXT`);

@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDefaultDate();
   initZoomModal();
   initFaqs();
+  initSuccessModal();
 });
 
 // Toast Helper
@@ -218,21 +219,53 @@ function initBookingForm() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        showToast(`Booking Successful! Your ID: ${data.bookingId}`, 'success');
+        showToast(`Booking Registered! Reference: ${data.bookingId}`, 'success');
+
+        // Populate Success Modal card details
+        const modalBookingId = document.getElementById('success-booking-id');
+        const modalCustomerName = document.getElementById('success-customer-name');
+        const modalVehicleDetails = document.getElementById('success-vehicle-details');
+        const modalBookingDate = document.getElementById('success-booking-date');
+        const modalServiceType = document.getElementById('success-service-type');
+
+        if (modalBookingId) modalBookingId.textContent = data.bookingId;
+        if (modalCustomerName) modalCustomerName.textContent = bookingData.customerName;
+        if (modalVehicleDetails) modalVehicleDetails.textContent = `${bookingData.vehicleBrand} ${bookingData.vehicleModel}`;
+        if (modalBookingDate) modalBookingDate.textContent = bookingData.bookingDate;
+        if (modalServiceType) modalServiceType.textContent = bookingData.serviceType;
+
+        // Build pre-composed confirmation WhatsApp message
+        let cleanPhone = bookingData.phone.replace(/\D/g, '');
+        if (cleanPhone.length === 10) {
+          cleanPhone = '91' + cleanPhone;
+        }
+
+        const waMessage = `*S.D. HERO SERVICE CENTRE - BOOKING CONFIRMED* 🏍️\n\nHello *${bookingData.customerName}*,\n\nWe have successfully received your service booking request!\n\n📋 *Booking Details*:\n• *Booking ID*: ${data.bookingId}\n• *Vehicle*: ${bookingData.vehicleBrand} ${bookingData.vehicleModel}\n• *Service*: ${bookingData.serviceType}\n• *Date*: ${bookingData.bookingDate}\n\nOur garage team is reviewing your slot. S.D. Hero will call you back shortly on this phone number to confirm your appointment!\n\nThank you for choosing Patna's premium workshop!\n\n🌐 Track live: https://sdhero-service.onrender.com/?track=${data.bookingId}`;
+
+        const waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(waMessage)}`;
+        
+        const waBtn = document.getElementById('btn-whatsapp-confirm');
+        if (waBtn) {
+          waBtn.href = waUrl;
+        }
+
+        // Display Success & WhatsApp modal
+        const successModal = document.getElementById('booking-success-modal');
+        if (successModal) {
+          successModal.classList.add('show');
+        }
+
         form.reset();
         if (previewContainer) previewContainer.style.display = 'none';
         if (previewImage) previewImage.src = '';
         selectedVehicleBase64 = null;
         initDefaultDate();
 
-        // Automatically populate tracker and scroll
+        // Populate search input in the background so it is primed when they close modal
         const trackerInput = document.getElementById('track-search-input');
         if (trackerInput) {
           trackerInput.value = data.bookingId;
-          // Trigger tracker search
           document.getElementById('btn-track-search').click();
-          // Smooth scroll to tracker section
-          document.getElementById('track').scrollIntoView({ behavior: 'smooth' });
         }
       } else {
         showToast(data.error || 'Failed to submit booking. Please try again.', 'error');
@@ -612,5 +645,30 @@ function populateHealthStatus(elemId, status) {
   } else {
     elem.classList.add('health-caution');
   }
+}
+
+// Interactive Booking Success Modal Toggler & Scroller
+function initSuccessModal() {
+  const modal = document.getElementById('booking-success-modal');
+  const closeBtn = document.getElementById('btn-close-success');
+
+  if (!modal || !closeBtn) return;
+
+  function closeAndScroll() {
+    modal.classList.remove('show');
+    // Smooth scroll to tracker section
+    const trackSection = document.getElementById('track');
+    if (trackSection) {
+      trackSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  closeBtn.addEventListener('click', closeAndScroll);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal || e.target === closeBtn) {
+      closeAndScroll();
+    }
+  });
 }
 

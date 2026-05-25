@@ -1600,6 +1600,48 @@ try {
     &lt;/div&gt;
   &lt;/div&gt;
 
+  &lt;!-- Interactive Booking Success &amp; WhatsApp Confirmation Modal --&gt;
+  &lt;div id=&quot;booking-success-modal&quot; class=&quot;success-modal&quot;&gt;
+    &lt;div class=&quot;success-modal-content&quot;&gt;
+      &lt;button type=&quot;button&quot; class=&quot;success-modal-close&quot; id=&quot;btn-close-success&quot;&gt;✕&lt;/button&gt;
+      &lt;div class=&quot;success-icon-container&quot;&gt;✓&lt;/div&gt;
+      &lt;h3 class=&quot;success-modal-title&quot;&gt;Booking Registered!&lt;/h3&gt;
+      &lt;p class=&quot;success-modal-subtitle&quot;&gt;We have saved your workshop slot in our garage database.&lt;/p&gt;
+
+      &lt;div class=&quot;success-booking-card&quot;&gt;
+        &lt;div class=&quot;success-card-row&quot;&gt;
+          &lt;span class=&quot;success-card-label&quot;&gt;Booking Reference ID&lt;/span&gt;
+          &lt;span class=&quot;success-card-value highlight-id&quot; id=&quot;success-booking-id&quot;&gt;-&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;success-card-row&quot;&gt;
+          &lt;span class=&quot;success-card-label&quot;&gt;Customer Name&lt;/span&gt;
+          &lt;span class=&quot;success-card-value&quot; id=&quot;success-customer-name&quot;&gt;-&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;success-card-row&quot;&gt;
+          &lt;span class=&quot;success-card-label&quot;&gt;Vehicle Details&lt;/span&gt;
+          &lt;span class=&quot;success-card-value&quot; id=&quot;success-vehicle-details&quot;&gt;-&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;success-card-row&quot;&gt;
+          &lt;span class=&quot;success-card-label&quot;&gt;Scheduled Date&lt;/span&gt;
+          &lt;span class=&quot;success-card-value&quot; id=&quot;success-booking-date&quot;&gt;-&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;success-card-row&quot;&gt;
+          &lt;span class=&quot;success-card-label&quot;&gt;Selected Service&lt;/span&gt;
+          &lt;span class=&quot;success-card-value&quot; id=&quot;success-service-type&quot;&gt;-&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;a href=&quot;#&quot; id=&quot;btn-whatsapp-confirm&quot; class=&quot;btn-whatsapp-confirm&quot; target=&quot;_blank&quot;&gt;
+        &lt;svg width=&quot;24&quot; height=&quot;24&quot; viewBox=&quot;0 0 24 24&quot; fill=&quot;currentColor&quot;&gt;
+          &lt;path d=&quot;M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.46L0 24zm6.732-4.148l.405.241c1.472.875 3.167 1.336 4.887 1.337 5.568 0 10.099-4.529 10.103-10.102.002-2.699-1.047-5.239-2.951-7.147-1.905-1.905-4.437-2.954-7.14-2.956-5.578 0-10.108 4.53-10.112 10.104-.001 1.8.474 3.56 1.376 5.116l.262.455-1.01 3.693 3.774-1.002z&quot;/&gt;
+        &lt;/svg&gt;
+        Send WhatsApp Confirmation
+      &lt;/a&gt;
+
+      &lt;p class=&quot;whatsapp-disclaimer&quot;&gt;Opens WhatsApp with a pre-filled confirmation receipt message to your phone number.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
   &lt;script src=&quot;js/app.js&quot;&gt;&lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;
@@ -4075,6 +4117,171 @@ footer {
   margin: 0.2rem 0 0 0;
 }
 
+/* Booking Success / WhatsApp Confirmation Modal Overlay */
+.success-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(6, 7, 10, 0.95);
+  backdrop-filter: blur(8px);
+  z-index: 3100; /* Higher than zoom modal */
+  display: none;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.success-modal.show {
+  display: flex;
+  opacity: 1;
+}
+
+.success-modal-content {
+  position: relative;
+  max-width: 500px;
+  width: 90%;
+  padding: 3rem 2.5rem;
+  transform: scale(0.9);
+  transition: transform var(--transition-normal);
+  box-shadow: var(--shadow-lg), var(--accent-glow);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+  text-align: center;
+}
+
+.success-modal.show .success-modal-content {
+  transform: scale(1);
+}
+
+.success-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.success-modal-close:hover {
+  color: #fff;
+}
+
+.success-icon-container {
+  width: 70px;
+  height: 70px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 106, 0, 0.1);
+  border: 2px dashed var(--accent);
+  color: var(--accent);
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem auto;
+  animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 106, 0, 0.4); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 106, 0, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 106, 0, 0); }
+}
+
+.success-modal-title {
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  color: #fff;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.success-modal-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.success-booking-card {
+  background: rgba(11, 12, 16, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.success-card-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 0;
+}
+
+.success-card-row:last-child {
+  border-bottom: none;
+}
+
+.success-card-label {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.success-card-value {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.success-card-value.highlight-id {
+  color: var(--accent);
+  font-family: &#039;Fira Code&#039;, &#039;Courier New&#039;, monospace;
+  font-size: 1rem;
+}
+
+.btn-whatsapp-confirm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  background: #25d366; /* WhatsApp Green */
+  color: #fff;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+  text-decoration: none;
+}
+
+.btn-whatsapp-confirm:hover {
+  background: #128c7e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+}
+
+.btn-whatsapp-confirm svg {
+  fill: #fff;
+}
+
+.whatsapp-disclaimer {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 1rem;
+}
+
 
 
 </code></pre>
@@ -4096,6 +4303,7 @@ document.addEventListener(&#039;DOMContentLoaded&#039;, () =&gt; {
   initDefaultDate();
   initZoomModal();
   initFaqs();
+  initSuccessModal();
 });
 
 // Toast Helper
@@ -4303,21 +4511,53 @@ function initBookingForm() {
       const data = await response.json();
 
       if (response.ok &amp;&amp; data.success) {
-        showToast(`Booking Successful! Your ID: ${data.bookingId}`, &#039;success&#039;);
+        showToast(`Booking Registered! Reference: ${data.bookingId}`, &#039;success&#039;);
+
+        // Populate Success Modal card details
+        const modalBookingId = document.getElementById(&#039;success-booking-id&#039;);
+        const modalCustomerName = document.getElementById(&#039;success-customer-name&#039;);
+        const modalVehicleDetails = document.getElementById(&#039;success-vehicle-details&#039;);
+        const modalBookingDate = document.getElementById(&#039;success-booking-date&#039;);
+        const modalServiceType = document.getElementById(&#039;success-service-type&#039;);
+
+        if (modalBookingId) modalBookingId.textContent = data.bookingId;
+        if (modalCustomerName) modalCustomerName.textContent = bookingData.customerName;
+        if (modalVehicleDetails) modalVehicleDetails.textContent = `${bookingData.vehicleBrand} ${bookingData.vehicleModel}`;
+        if (modalBookingDate) modalBookingDate.textContent = bookingData.bookingDate;
+        if (modalServiceType) modalServiceType.textContent = bookingData.serviceType;
+
+        // Build pre-composed confirmation WhatsApp message
+        let cleanPhone = bookingData.phone.replace(/\D/g, &#039;&#039;);
+        if (cleanPhone.length === 10) {
+          cleanPhone = &#039;91&#039; + cleanPhone;
+        }
+
+        const waMessage = `*S.D. HERO SERVICE CENTRE - BOOKING CONFIRMED* 🏍️\n\nHello *${bookingData.customerName}*,\n\nWe have successfully received your service booking request!\n\n📋 *Booking Details*:\n• *Booking ID*: ${data.bookingId}\n• *Vehicle*: ${bookingData.vehicleBrand} ${bookingData.vehicleModel}\n• *Service*: ${bookingData.serviceType}\n• *Date*: ${bookingData.bookingDate}\n\nOur garage team is reviewing your slot. S.D. Hero will call you back shortly on this phone number to confirm your appointment!\n\nThank you for choosing Patna&#039;s premium workshop!\n\n🌐 Track live: https://sdhero-service.onrender.com/?track=${data.bookingId}`;
+
+        const waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&amp;text=${encodeURIComponent(waMessage)}`;
+        
+        const waBtn = document.getElementById(&#039;btn-whatsapp-confirm&#039;);
+        if (waBtn) {
+          waBtn.href = waUrl;
+        }
+
+        // Display Success &amp; WhatsApp modal
+        const successModal = document.getElementById(&#039;booking-success-modal&#039;);
+        if (successModal) {
+          successModal.classList.add(&#039;show&#039;);
+        }
+
         form.reset();
         if (previewContainer) previewContainer.style.display = &#039;none&#039;;
         if (previewImage) previewImage.src = &#039;&#039;;
         selectedVehicleBase64 = null;
         initDefaultDate();
 
-        // Automatically populate tracker and scroll
+        // Populate search input in the background so it is primed when they close modal
         const trackerInput = document.getElementById(&#039;track-search-input&#039;);
         if (trackerInput) {
           trackerInput.value = data.bookingId;
-          // Trigger tracker search
           document.getElementById(&#039;btn-track-search&#039;).click();
-          // Smooth scroll to tracker section
-          document.getElementById(&#039;track&#039;).scrollIntoView({ behavior: &#039;smooth&#039; });
         }
       } else {
         showToast(data.error || &#039;Failed to submit booking. Please try again.&#039;, &#039;error&#039;);
@@ -4697,6 +4937,31 @@ function populateHealthStatus(elemId, status) {
   } else {
     elem.classList.add(&#039;health-caution&#039;);
   }
+}
+
+// Interactive Booking Success Modal Toggler &amp; Scroller
+function initSuccessModal() {
+  const modal = document.getElementById(&#039;booking-success-modal&#039;);
+  const closeBtn = document.getElementById(&#039;btn-close-success&#039;);
+
+  if (!modal || !closeBtn) return;
+
+  function closeAndScroll() {
+    modal.classList.remove(&#039;show&#039;);
+    // Smooth scroll to tracker section
+    const trackSection = document.getElementById(&#039;track&#039;);
+    if (trackSection) {
+      trackSection.scrollIntoView({ behavior: &#039;smooth&#039; });
+    }
+  }
+
+  closeBtn.addEventListener(&#039;click&#039;, closeAndScroll);
+
+  modal.addEventListener(&#039;click&#039;, (e) =&gt; {
+    if (e.target === modal || e.target === closeBtn) {
+      closeAndScroll();
+    }
+  });
 }
 
 </code></pre>

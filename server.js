@@ -206,25 +206,35 @@ app.put('/api/admin/bookings/:id', authenticateAdmin, async (req, res) => {
 });
 
 // Initialize DB and start listening
-try {
-  const db = await getDb();
-  app.listen(PORT, () => {
-    console.log(`=======================================================`);
-    console.log(`  🏍️  SD HERO SERVICE Service Centre API RUNNING ON PORT ${PORT}`);
-    console.log(`  🌐  Local URL: http://localhost:${PORT}`);
-    console.log(`=======================================================`);
-
-    // Automatically generate the latest PDF/HTML codebase blueprint on startup
-    exec('node scratch/generate_pdf_html.js', (err, stdout, stderr) => {
-      if (err) {
-        console.error('⚠️ Failed to auto-generate codebase blueprint:', err);
-      } else {
-        console.log(stdout.trim());
-      }
-    });
+if (process.env.VERCEL) {
+  // Serverless execution: Warm up DB schema on start
+  getDb().catch(err => {
+    console.error('Failed to initialize database schema in serverless mode:', err);
   });
-} catch (err) {
-  console.error('Database connection failed. Server cannot start.', err);
-  process.exit(1);
+} else {
+  // Local or container startup
+  try {
+    const db = await getDb();
+    app.listen(PORT, () => {
+      console.log(`=======================================================`);
+      console.log(`  🏍️  SD HERO SERVICE Service Centre API RUNNING ON PORT ${PORT}`);
+      console.log(`  🌐  Local URL: http://localhost:${PORT}`);
+      console.log(`=======================================================`);
+
+      // Automatically generate the latest PDF/HTML codebase blueprint on startup
+      exec('node scratch/generate_pdf_html.js', (err, stdout, stderr) => {
+        if (err) {
+          console.error('⚠️ Failed to auto-generate codebase blueprint:', err);
+        } else {
+          console.log(stdout.trim());
+        }
+      });
+    });
+  } catch (err) {
+    console.error('Database connection failed. Server cannot start.', err);
+    process.exit(1);
+  }
 }
+
+export default app;
 

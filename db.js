@@ -57,7 +57,7 @@ class PostgresWrapper {
 export async function getDb() {
   if (dbInstance) return dbInstance;
 
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING;
 
   if (connectionString) {
     console.log('🔌 Connecting to cloud PostgreSQL database...');

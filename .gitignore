@@ -3,3 +3,5 @@ database.sqlite
 .env
 .system_generated/
 *.log
+
+.vercel

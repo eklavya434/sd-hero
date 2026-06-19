@@ -172,7 +172,7 @@ app.post('/api/symptom-check', async (req, res) => {
 
     if (geminiApiKey) {
       console.log("Processing symptom check using Gemini API (multimodal)...");
-      const systemPrompt = `You are an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
+      const systemPrompt = `You are Devi, an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
 Your task is to analyze the customer's bike symptom description (and optional image if provided) and provide a diagnosis using ONLY the provided symptom database context.
 Do NOT invent any causes, costs, or urgency levels. You must strictly base your diagnosis on the provided context matches.
 
@@ -266,7 +266,7 @@ Instructions:
       }
     } else if (claudeApiKey) {
       console.log("Processing symptom check using Claude API (multimodal)...");
-      const systemPrompt = `You are an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
+      const systemPrompt = `You are Devi, an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
 Your task is to analyze the customer's bike symptom description (and optional image if provided) and provide a diagnosis using ONLY the provided symptom database context.
 Do NOT invent any causes, costs, or urgency levels. You must strictly base your diagnosis on the provided context matches.
 

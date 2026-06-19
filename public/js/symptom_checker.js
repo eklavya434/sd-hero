@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </svg>
           </div>
           <div class="symptom-chat-title">
-            <h4>SD Hero AI Mechanic</h4>
+            <h4>Devi - SD Hero AI Mechanic</h4>
             <span>Online</span>
           </div>
         </div>
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       <div class="symptom-chat-body" id="symptom-chat-body">
         <div class="symptom-chat-message system-msg">
-          Hello! I am your AI Bike Diagnostic Assistant. 🏍️<br><br>
+          Hello! I am Devi, your AI Bike Diagnostic Assistant. 🏍️<br><br>
           Describe what's wrong with your bike or scooter in plain English, and <strong>you can now upload a picture</strong> of the problem area (e.g. engine oil leak, worn out brakes, exhaust smoke) using the camera icon below!
         </div>
       </div>

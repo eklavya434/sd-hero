@@ -232,7 +232,8 @@ Design Requirements:
   &quot;scripts&quot;: {
     &quot;start&quot;: &quot;node server.js&quot;,
     &quot;dev&quot;: &quot;nodemon server.js&quot;,
-    &quot;generate-pdf&quot;: &quot;node scratch/generate_pdf_html.js&quot;
+    &quot;generate-pdf&quot;: &quot;node scratch/generate_pdf_html.js&quot;,
+    &quot;build&quot;: &quot;node scratch/generate_pdf_html.js&quot;
   },
   &quot;dependencies&quot;: {
     &quot;bcryptjs&quot;: &quot;^2.4.3&quot;,
@@ -340,7 +341,7 @@ class PostgresWrapper {
 export async function getDb() {
   if (dbInstance) return dbInstance;
 
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING;
 
   if (connectionString) {
     console.log(&#039;🔌 Connecting to cloud PostgreSQL database...&#039;);
@@ -508,6 +509,7 @@ import bcrypt from &#039;bcryptjs&#039;;
 import dotenv from &#039;dotenv&#039;;
 import path from &#039;path&#039;;
 import { fileURLToPath } from &#039;url&#039;;
+import fs from &#039;fs&#039;;
 import { getDb, generateBookingId } from &#039;./db.js&#039;;
 
 dotenv.config();
@@ -546,6 +548,216 @@ function authenticateAdmin(req, res, next) {
 // ----------------------------------------------------
 // CUSTOMER APIS
 // ----------------------------------------------------
+
+// Load Symptom Knowledge Base
+const symptomDbPath = path.join(__dirname, &#039;symptom_knowledge_base.json&#039;);
+let symptomKnowledgeBase = [];
+try {
+  const fileData = fs.readFileSync(symptomDbPath, &#039;utf8&#039;);
+  symptomKnowledgeBase = JSON.parse(fileData);
+  console.log(`Loaded ${symptomKnowledgeBase.length} symptom entries from database.`);
+} catch (error) {
+  console.error(&#039;Failed to load symptom knowledge base:&#039;, error);
+}
+
+// Tokenizer and STOP_WORDS for Token Overlap search
+const STOP_WORDS = new Set([
+  &#039;i&#039;, &#039;me&#039;, &#039;my&#039;, &#039;myself&#039;, &#039;we&#039;, &#039;our&#039;, &#039;ours&#039;, &#039;ourselves&#039;, &#039;you&#039;, &#039;your&#039;, &#039;yours&#039;, 
+  &#039;yourself&#039;, &#039;yourselves&#039;, &#039;he&#039;, &#039;him&#039;, &#039;his&#039;, &#039;himself&#039;, &#039;she&#039;, &#039;her&#039;, &#039;hers&#039;, 
+  &#039;herself&#039;, &#039;it&#039;, &#039;its&#039;, &#039;itself&#039;, &#039;they&#039;, &#039;them&#039;, &#039;their&#039;, &#039;theirs&#039;, &#039;themselves&#039;, 
+  &#039;what&#039;, &#039;which&#039;, &#039;who&#039;, &#039;whom&#039;, &#039;this&#039;, &#039;that&#039;, &#039;these&#039;, &#039;those&#039;, &#039;am&#039;, &#039;is&#039;, &#039;are&#039;, 
+  &#039;was&#039;, &#039;were&#039;, &#039;be&#039;, &#039;been&#039;, &#039;being&#039;, &#039;have&#039;, &#039;has&#039;, &#039;had&#039;, &#039;having&#039;, &#039;do&#039;, &#039;does&#039;, 
+  &#039;did&#039;, &#039;doing&#039;, &#039;a&#039;, &#039;an&#039;, &#039;the&#039;, &#039;and&#039;, &#039;but&#039;, &#039;if&#039;, &#039;or&#039;, &#039;because&#039;, &#039;as&#039;, &#039;until&#039;, 
+  &#039;while&#039;, &#039;of&#039;, &#039;at&#039;, &#039;by&#039;, &#039;for&#039;, &#039;with&#039;, &#039;about&#039;, &#039;against&#039;, &#039;between&#039;, &#039;into&#039;, 
+  &#039;through&#039;, &#039;during&#039;, &#039;before&#039;, &#039;after&#039;, &#039;above&#039;, &#039;below&#039;, &#039;to&#039;, &#039;from&#039;, &#039;up&#039;, &#039;down&#039;, 
+  &#039;in&#039;, &#039;out&#039;, &#039;on&#039;, &#039;off&#039;, &#039;over&#039;, &#039;under&#039;, &#039;again&#039;, &#039;further&#039;, &#039;then&#039;, &#039;once&#039;, &#039;here&#039;, 
+  &#039;there&#039;, &#039;when&#039;, &#039;where&#039;, &#039;why&#039;, &#039;how&#039;, &#039;all&#039;, &#039;any&#039;, &#039;both&#039;, &#039;each&#039;, &#039;few&#039;, &#039;more&#039;, 
+  &#039;most&#039;, &#039;other&#039;, &#039;some&#039;, &#039;such&#039;, &#039;no&#039;, &#039;nor&#039;, &#039;not&#039;, &#039;only&#039;, &#039;own&#039;, &#039;same&#039;, &#039;so&#039;, 
+  &#039;than&#039;, &#039;too&#039;, &#039;very&#039;, &#039;s&#039;, &#039;t&#039;, &#039;can&#039;, &#039;will&#039;, &#039;just&#039;, &#039;don&#039;, &#039;should&#039;, &#039;now&#039;,
+  &#039;bike&#039;, &#039;scooter&#039;, &#039;motorcycle&#039;, &#039;scooty&#039;, &#039;gadi&#039;, &#039;vehicle&#039;, &#039;wheels&#039;,
+  &#039;hai&#039;, &#039;ka&#039;, &#039;ki&#039;, &#039;mein&#039;, &#039;se&#039;, &#039;ho&#039;, &#039;raha&#039;, &#039;chal&#039;, &#039;rha&#039;, &#039;ko&#039;, &#039;me&#039;
+]);
+
+function tokenize(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, &#039;&#039;)
+    .split(/\s+/)
+    .filter(w =&gt; w.length &gt; 0);
+}
+
+function cleanAndParseJson(text) {
+  let cleaned = text.trim();
+  if (cleaned.startsWith(&#039;```json&#039;)) {
+    cleaned = cleaned.substring(7);
+  } else if (cleaned.startsWith(&#039;```&#039;)) {
+    cleaned = cleaned.substring(3);
+  }
+  if (cleaned.endsWith(&#039;```&#039;)) {
+    cleaned = cleaned.substring(0, cleaned.length - 3);
+  }
+  return JSON.parse(cleaned.trim());
+}
+
+// Symptom Checker AI Endpoint
+app.post(&#039;/api/symptom-check&#039;, async (req, res) =&gt; {
+  try {
+    const { query } = req.body;
+    if (!query || typeof query !== &#039;string&#039;) {
+      return res.status(400).json({ error: &#039;Query string is required.&#039; });
+    }
+
+    const trimmedQuery = query.trim().substring(0, 500);
+    if (!trimmedQuery) {
+      return res.status(400).json({ error: &#039;Query cannot be empty.&#039; });
+    }
+
+    // Token-overlap keyword matching
+    const queryTokens = tokenize(trimmedQuery).filter(w =&gt; !STOP_WORDS.has(w));
+    const activeTokens = queryTokens.length &gt; 0 ? queryTokens : tokenize(trimmedQuery);
+
+    const scored = symptomKnowledgeBase.map(entry =&gt; {
+      let score = 0;
+      const descTokens = tokenize(entry.issue_description);
+      const causeTokens = entry.likely_causes.flatMap(c =&gt; tokenize(c));
+      const fixTokens = tokenize(entry.typical_fix);
+
+      for (const q of activeTokens) {
+        if (descTokens.includes(q)) {
+          score += 3;
+        } else if (descTokens.some(d =&gt; d.includes(q) || q.includes(d))) {
+          score += 1.5;
+        }
+        if (causeTokens.includes(q)) {
+          score += 2;
+        } else if (causeTokens.some(c =&gt; c.includes(q) || q.includes(c))) {
+          score += 1;
+        }
+        if (fixTokens.includes(q)) {
+          score += 1;
+        }
+      }
+      return { entry, score };
+    });
+
+    const sorted = scored.sort((a, b) =&gt; b.score - a.score);
+    const topMatches = sorted
+      .filter(item =&gt; item.score &gt; 0)
+      .slice(0, 4)
+      .map(item =&gt; item.entry);
+
+    if (topMatches.length === 0) {
+      return res.json({
+        match_found: false,
+        recommendation: &quot;We couldn&#039;t find a direct match for your symptom in our database. Since safety is our top priority, we recommend bringing your bike to our Patna workshop for a physical inspection by our expert technicians.&quot;,
+        cta: &quot;Book a physical inspection at SD Hero&quot;
+      });
+    }
+
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      console.warn(&quot;ANTHROPIC_API_KEY is not configured. Using rule-based fallback.&quot;);
+      const top = topMatches[0];
+      return res.json({
+        match_found: true,
+        diagnoses: [
+          {
+            cause: top.likely_causes[0],
+            probability: &quot;High&quot;,
+            typical_fix: top.typical_fix,
+            cost_range_inr: top.cost_range_inr,
+            urgency_level: top.urgency_level
+          }
+        ],
+        recommendation: &quot;Here is the closest match from our database. Please book a service to have it verified.&quot;,
+        cta: &quot;Book a service with SD Hero&quot;
+      });
+    }
+
+    const systemPrompt = `You are an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
+Your task is to analyze the customer&#039;s bike symptom description and provide a diagnosis using ONLY the provided symptom database context.
+Do NOT invent any causes, costs, or urgency levels. You must strictly base your diagnosis on the provided context matches.
+
+Context (Matches from our symptom database):
+${JSON.stringify(topMatches, null, 2)}
+
+Instructions:
+1. Compare the customer&#039;s description with the provided context entries.
+2. If one or more context entries are relevant to the customer&#039;s problem, select the top 2-3 most likely causes, rank them by probability, and extract their costs and urgency levels from the matched context.
+3. You must format your response as a strict JSON object with the following structure:
+{
+  &quot;match_found&quot;: true,
+  &quot;diagnoses&quot;: [
+    {
+      &quot;cause&quot;: &quot;Specific cause (from the matching context)&quot;,
+      &quot;probability&quot;: &quot;High&quot; | &quot;Medium&quot; | &quot;Low&quot;,
+      &quot;typical_fix&quot;: &quot;Description of the fix (from the matching context)&quot;,
+      &quot;cost_range_inr&quot;: &quot;Estimated cost range (from the matching context, e.g., &#039;250 - 650&#039;)&quot;,
+      &quot;urgency_level&quot;: &quot;Fix now&quot; | &quot;Fix this week&quot; | &quot;Can wait&quot;
+    }
+  ],
+  &quot;recommendation&quot;: &quot;A short, professional message summarizing the findings.&quot;,
+  &quot;cta&quot;: &quot;Book a service with SD Hero today to get your bike inspected by our expert mechanics.&quot;
+}
+
+4. If NONE of the provided context entries match or are relevant to the customer&#039;s description, or if the customer&#039;s query is completely unrelated to two-wheeler mechanical/electrical issues, you MUST return:
+{
+  &quot;match_found&quot;: false,
+  &quot;recommendation&quot;: &quot;We couldn&#039;t find a direct match for your symptom in our database. Since safety is our top priority, we recommend bringing your bike to our Patna workshop for a physical inspection by our expert technicians.&quot;,
+  &quot;cta&quot;: &quot;Book a physical inspection at SD Hero&quot;
+}
+
+Ensure the output is ONLY the JSON block. Do not include any conversational filler, markdown formatting (no \`\`\`json blocks), or extra text outside the JSON object.`;
+
+    const apiResponse = await fetch(&#039;https://api.anthropic.com/v1/messages&#039;, {
+      method: &#039;POST&#039;,
+      headers: {
+        &#039;x-api-key&#039;: apiKey,
+        &#039;anthropic-version&#039;: &#039;2023-06-01&#039;,
+        &#039;content-type&#039;: &#039;application/json&#039;
+      },
+      body: JSON.stringify({
+        model: &#039;claude-3-5-sonnet-20240620&#039;,
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: [
+          {
+            role: &#039;user&#039;,
+            content: `Customer symptom description: &quot;${trimmedQuery}&quot;`
+          }
+        ]
+      })
+    });
+
+    if (!apiResponse.ok) {
+      const errText = await apiResponse.text();
+      console.error(&#039;Claude API error response:&#039;, errText);
+      throw new Error(`Claude API call failed with status ${apiResponse.status}`);
+    }
+
+    const apiData = await apiResponse.json();
+    const content = apiData.content?.[0]?.text;
+    if (!content) {
+      throw new Error(&#039;Empty response from Claude API&#039;);
+    }
+
+    try {
+      const result = cleanAndParseJson(content);
+      res.json(result);
+    } catch (parseError) {
+      console.error(&#039;Failed to parse Claude response:&#039;, content, parseError);
+      res.json({
+        match_found: false,
+        recommendation: &quot;We had trouble analyzing your symptom description. Please describe it differently or book a physical inspection.&quot;,
+        cta: &quot;Book an inspection&quot;
+      });
+    }
+
+  } catch (error) {
+    console.error(&#039;Symptom check error:&#039;, error);
+    res.status(500).json({ error: &#039;Failed to process symptom check.&#039; });
+  }
+});
 
 // 1. Submit a booking request
 app.post(&#039;/api/bookings&#039;, async (req, res) =&gt; {
@@ -707,27 +919,37 @@ app.put(&#039;/api/admin/bookings/:id&#039;, authenticateAdmin, async (req, res)
 });
 
 // Initialize DB and start listening
-try {
-  const db = await getDb();
-  app.listen(PORT, () =&gt; {
-    console.log(`=======================================================`);
-    console.log(`  🏍️  SD HERO SERVICE Service Centre API RUNNING ON PORT ${PORT}`);
-    console.log(`  🌐  Local URL: http://localhost:${PORT}`);
-    console.log(`=======================================================`);
-
-    // Automatically generate the latest PDF/HTML codebase blueprint on startup
-    exec(&#039;node scratch/generate_pdf_html.js&#039;, (err, stdout, stderr) =&gt; {
-      if (err) {
-        console.error(&#039;⚠️ Failed to auto-generate codebase blueprint:&#039;, err);
-      } else {
-        console.log(stdout.trim());
-      }
-    });
+if (process.env.VERCEL) {
+  // Serverless execution: Warm up DB schema on start
+  getDb().catch(err =&gt; {
+    console.error(&#039;Failed to initialize database schema in serverless mode:&#039;, err);
   });
-} catch (err) {
-  console.error(&#039;Database connection failed. Server cannot start.&#039;, err);
-  process.exit(1);
+} else {
+  // Local or container startup
+  try {
+    const db = await getDb();
+    app.listen(PORT, () =&gt; {
+      console.log(`=======================================================`);
+      console.log(`  🏍️  SD HERO SERVICE Service Centre API RUNNING ON PORT ${PORT}`);
+      console.log(`  🌐  Local URL: http://localhost:${PORT}`);
+      console.log(`=======================================================`);
+
+      // Automatically generate the latest PDF/HTML codebase blueprint on startup
+      exec(&#039;node scratch/generate_pdf_html.js&#039;, (err, stdout, stderr) =&gt; {
+        if (err) {
+          console.error(&#039;⚠️ Failed to auto-generate codebase blueprint:&#039;, err);
+        } else {
+          console.log(stdout.trim());
+        }
+      });
+    });
+  } catch (err) {
+    console.error(&#039;Database connection failed. Server cannot start.&#039;, err);
+    process.exit(1);
+  }
 }
+
+export default app;
 
 </code></pre>
     </div>
@@ -778,7 +1000,6 @@ try {
           &lt;li&gt;&lt;a href=&quot;#track&quot;&gt;Track Status&lt;/a&gt;&lt;/li&gt;
           &lt;li&gt;&lt;a href=&quot;#contact&quot;&gt;Contact&lt;/a&gt;&lt;/li&gt;
           &lt;li&gt;&lt;a href=&quot;https://wa.me/919334834344?text=Hello%20SD%20Hero%20Service%20Centre&quot; target=&quot;_blank&quot; style=&quot;color: #25D366; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;&quot;&gt;&lt;span style=&quot;font-size: 1.15rem;&quot;&gt;💬&lt;/span&gt; WhatsApp Help&lt;/a&gt;&lt;/li&gt;
-          &lt;li&gt;&lt;a href=&quot;admin.html&quot; class=&quot;btn-nav&quot;&gt;Admin Login&lt;/a&gt;&lt;/li&gt;
         &lt;/ul&gt;
       &lt;/nav&gt;
     &lt;/div&gt;
@@ -792,7 +1013,7 @@ try {
           &lt;span&gt;❤️&lt;/span&gt; Chalta Rahe Tera-Mera Milon Ka Yaarana...
         &lt;/div&gt;
         &lt;h1&gt;Keep Your Companion Smooth With &lt;span&gt;Expert Care&lt;/span&gt;&lt;/h1&gt;
-        &lt;p class=&quot;lead&quot;&gt;For over 20 years, Sanjay Sinha has been keeping Patna&#039;s trusted companions running smoothly. Because in our homes, a bike isn&#039;t just steel and engine oil—it&#039;s a family member that carries our dreams, hard work, and daily journeys.&lt;/p&gt;
+        &lt;p class=&quot;lead&quot;&gt;For over 20 years, Deepak Kumar Sinha has been keeping Patna&#039;s trusted companions running smoothly. Because in our homes, a bike isn&#039;t just steel and engine oil—it&#039;s a family member that carries our dreams, hard work, and daily journeys.&lt;/p&gt;
         &lt;div class=&quot;hero-buttons&quot;&gt;
           &lt;a href=&quot;#book&quot; class=&quot;btn btn-primary&quot; id=&quot;hero-btn-book&quot;&gt;Book Slot Now&lt;/a&gt;
           &lt;a href=&quot;#track&quot; class=&quot;btn btn-secondary&quot; id=&quot;hero-btn-track&quot;&gt;Track Your Repair&lt;/a&gt;
@@ -927,7 +1148,7 @@ try {
             Remember those early, crisp Patna mornings riding your Splendor to drop your kids at school? Or the heavy monsoon rains where your trusted scooter stood strong, bringing you safely home to your family?
           &lt;/p&gt;
           &lt;p style=&quot;font-family: var(--font-body); font-size: 0.95rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 2rem; text-align: left;&quot;&gt;
-            In every Indian household, a two-wheeler is not just a machine; it is a loyal humsafar (companion) that carries your hard work, sacrifices, and daily dreams. For over two decades, **Sanjay Sinha** at **S.D. Hero Service Centre** has treated every motorcycle entering our Lohanipur workshop as a family member that deserves the finest mechanical care.
+            In every Indian household, a two-wheeler is not just a machine; it is a loyal humsafar (companion) that carries your hard work, sacrifices, and daily dreams. For over two decades, **Deepak Kumar Sinha** at **S.D. Hero Service Centre** has treated every motorcycle entering our Lohanipur workshop as a family member that deserves the finest mechanical care.
           &lt;/p&gt;
           
           &lt;div style=&quot;display: flex; gap: 1.5rem; align-items: center; border-left: 3px solid var(--accent); padding-left: 1.5rem; margin-bottom: 2rem; text-align: left;&quot;&gt;
@@ -1604,7 +1825,7 @@ try {
         &lt;!-- Google Map Embedding (Lohanipur Patna) --&gt;
         &lt;div class=&quot;map-pane&quot;&gt;
           &lt;iframe 
-            src=&quot;https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3597.9868846985794!2d85.14811082531649!3d25.60533351438781!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39f29e37340b15cf%3A0xa1969a531e21bcf7!2sLohanipur%2C%20Patna%2C%20Bihar%20800003!5e0!3m2!1sen!2sin!4v1716500000000!5m2!1sen!2sin&quot; 
+            src=&quot;https://maps.google.com/maps?q=Laxmi+Uma+Plaza,+Lohanipur,+Patna,+Bihar+800003&amp;t=&amp;z=16&amp;ie=UTF8&amp;iwloc=&amp;output=embed&quot; 
             allowfullscreen=&quot;&quot; 
             loading=&quot;lazy&quot; 
             referrerpolicy=&quot;no-referrer-when-downgrade&quot;&gt;
@@ -1634,8 +1855,8 @@ try {
         &lt;div class=&quot;footer-links&quot;&gt;
           &lt;h5&gt;Administrative Area&lt;/h5&gt;
           &lt;ul&gt;
-            &lt;li&gt;&lt;a href=&quot;admin.html&quot;&gt;Owner Dashboard&lt;/a&gt;&lt;/li&gt;
             &lt;li&gt;&lt;a href=&quot;#contact&quot;&gt;Service Centre Location&lt;/a&gt;&lt;/li&gt;
+            &lt;li&gt;&lt;a href=&quot;admin.html&quot;&gt;Admin Login&lt;/a&gt;&lt;/li&gt;
           &lt;/ul&gt;
         &lt;/div&gt;
       &lt;/div&gt;
@@ -1705,6 +1926,7 @@ try {
   &lt;/div&gt;
 
   &lt;script src=&quot;js/app.js?v=2.2&quot;&gt;&lt;/script&gt;
+  &lt;script src=&quot;js/symptom_checker.js?v=2.2&quot;&gt;&lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;
 
@@ -4566,6 +4788,410 @@ footer {
   font-size: 0.75rem;
   color: var(--text-muted);
   margin-top: 1rem;
+}
+
+/* ==========================================================================
+   AI Symptom Checker Widget Styles
+   ========================================================================== */
+.symptom-checker-bubble {
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, #12141c 100%);
+  border: 2px solid var(--accent);
+  box-shadow: 0 4px 15px rgba(255, 106, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1000;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.symptom-checker-bubble:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(255, 106, 0, 0.5), var(--accent-glow);
+}
+
+.symptom-checker-bubble svg {
+  width: 28px;
+  height: 28px;
+  fill: var(--accent);
+  transition: transform var(--transition-normal);
+}
+
+.symptom-checker-bubble:hover svg {
+  transform: rotate(15deg);
+}
+
+.symptom-checker-bubble .unread-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.symptom-checker-drawer {
+  position: fixed;
+  bottom: 105px;
+  left: 30px;
+  width: 380px;
+  height: 550px;
+  max-height: 80vh;
+  max-width: calc(100vw - 60px);
+  background: rgba(23, 25, 33, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: none; /* Controlled by JS toggle */
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 1000;
+  animation: slide-up-fade var(--transition-normal) forwards;
+}
+
+@keyframes slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.symptom-checker-drawer.open {
+  display: flex;
+}
+
+.symptom-chat-header {
+  padding: 1.25rem;
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, #12141c 100%);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.symptom-chat-header-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.symptom-chat-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 106, 0, 0.1);
+  border: 1px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.symptom-chat-avatar svg {
+  width: 18px;
+  height: 18px;
+  fill: var(--accent);
+}
+
+.symptom-chat-title h4 {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin: 0;
+  font-weight: 600;
+}
+
+.symptom-chat-title span {
+  font-size: 0.75rem;
+  color: #25d366; /* Online Green */
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.symptom-chat-title span::before {
+  content: &#039;&#039;;
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #25d366;
+}
+
+.symptom-chat-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.symptom-chat-close svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--text-muted);
+  transition: fill var(--transition-fast);
+}
+
+.symptom-chat-close:hover svg {
+  fill: var(--accent);
+}
+
+.symptom-chat-body {
+  flex: 1;
+  padding: 1.25rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--bg-secondary);
+}
+
+/* Custom Scrollbar for Chat Body */
+.symptom-chat-body::-webkit-scrollbar {
+  width: 6px;
+}
+.symptom-chat-body::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+.symptom-chat-body::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.symptom-chat-message {
+  max-width: 85%;
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  animation: message-appear 0.3s ease forwards;
+}
+
+@keyframes message-appear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.symptom-chat-message.system-msg {
+  align-self: flex-start;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-bottom-left-radius: 2px;
+}
+
+.symptom-chat-message.user-msg {
+  align-self: flex-end;
+  background: var(--accent);
+  color: #fff;
+  border-bottom-right-radius: 2px;
+}
+
+/* Loading Indicator */
+.symptom-chat-loading {
+  align-self: flex-start;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  border-bottom-left-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.symptom-chat-loading span {
+  width: 8px;
+  height: 8px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  display: inline-block;
+  animation: bounce-dots 1.4s infinite ease-in-out both;
+}
+
+.symptom-chat-loading span:nth-child(1) { animation-delay: -0.32s; }
+.symptom-chat-loading span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce-dots {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+/* Diagnosis Cards Styling */
+.symptom-diagnosis-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.symptom-diagnosis-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.symptom-diagnosis-title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.urgency-badge {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.urgency-badge.now {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.urgency-badge.week {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.urgency-badge.wait {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.symptom-diagnosis-detail {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 0.5rem;
+}
+
+.symptom-diagnosis-cost {
+  margin-top: 0.25rem;
+  font-weight: 600;
+  color: var(--accent);
+  font-size: 0.9rem;
+}
+
+.symptom-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  text-decoration: none;
+  margin-top: 0.75rem;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.symptom-cta-btn:hover {
+  background: #e05d00;
+  transform: translateY(-1px);
+}
+
+/* Chat Input Area */
+.symptom-chat-input-area {
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--bg-tertiary) 0%, #12141c 100%);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.symptom-chat-input {
+  flex: 1;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  outline: none;
+  resize: none;
+  height: 40px;
+  line-height: 1.2;
+  transition: border-color var(--transition-fast);
+}
+
+.symptom-chat-input:focus {
+  border-color: var(--accent);
+}
+
+.symptom-chat-send {
+  background: var(--accent);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.symptom-chat-send:hover {
+  background: #e05d00;
+  transform: scale(1.05);
+}
+
+.symptom-chat-send svg {
+  width: 18px;
+  height: 18px;
+  fill: #fff;
 }
 
 

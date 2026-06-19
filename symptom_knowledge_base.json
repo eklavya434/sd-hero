@@ -1,0 +1,247 @@
+[
+  {
+    "issue_description": "squealing noise when applying brakes, screeching brake sound, noise from disc brakes",
+    "likely_causes": ["Worn out brake pads or shoes", "Accumulated dirt, dust, or moisture on the brake rotor/drum", "Warped disc rotor"],
+    "typical_fix": "Replace front/rear brake pads/shoes, clean the brake assembly with degreaser, or true/replace the disc rotor.",
+    "cost_range_inr": "250 - 650",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "spongy brakes, loose brake lever, brake lever goes all the way to handle, low brake fluid",
+    "likely_causes": ["Air bubbles trapped in the hydraulic brake line", "Leaking master cylinder seal", "Low brake fluid levels"],
+    "typical_fix": "Bleed the brakes to remove air pockets, replace degraded brake fluid, or rebuild the master cylinder.",
+    "cost_range_inr": "200 - 500",
+    "urgency_level": "Fix now"
+  },
+  {
+    "issue_description": "mileage has dropped, high petrol consumption, low fuel economy, engine consuming too much fuel",
+    "likely_causes": ["Clogged or dirty air filter", "Incorrect tyre pressure", "Out-of-tune carburetor or dirty fuel injector", "Worn spark plug"],
+    "typical_fix": "Replace/clean the air filter, inflate tyres to correct PSI, clean and tune the carburetor, and replace the spark plug.",
+    "cost_range_inr": "150 - 600",
+    "urgency_level": "Can wait"
+  },
+  {
+    "issue_description": "black smoke from exhaust pipe, dark smoke from silencer, soot on spark plug",
+    "likely_causes": ["Rich fuel-to-air mixture", "Choke valve stuck in closed position", "Clogged air filter"],
+    "typical_fix": "Adjust carburetor fuel mixture screw, clean air filter, and inspect/service the choke cable mechanism.",
+    "cost_range_inr": "200 - 550",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "white smoke from silencer, light grey smoke, engine burning oil, smoke on acceleration",
+    "likely_causes": ["Worn out piston rings", "Degraded valve stem seals", "Scratched cylinder bore"],
+    "typical_fix": "Perform engine top-end overhaul, replace piston rings, replace valve seals, and rebore the cylinder if necessary.",
+    "cost_range_inr": "1500 - 4500",
+    "urgency_level": "Fix now"
+  },
+  {
+    "issue_description": "clicking sound when starting, engine clicking but not starting, self start makes clicking noise",
+    "likely_causes": ["Weak or discharged battery", "Faulty starter relay/solenoid", "Loose or corroded battery terminals"],
+    "typical_fix": "Recharge or replace the 12V battery, clean/tighten the battery terminals, or replace the starter relay.",
+    "cost_range_inr": "150 - 1500",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "engine stalls at idle, bike turns off when idling at red light, engine stops when stopping",
+    "likely_causes": ["Idle speed (RPM) set too low", "Clogged idle jet in the carburetor", "Faulty spark plug or weak ignition spark"],
+    "typical_fix": "Adjust the idle screw to increase RPM, clean the carburetor jets, and check/replace the spark plug.",
+    "cost_range_inr": "150 - 450",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "engine sputtering at high speeds, engine misfire, bike jerks when accelerating fast",
+    "likely_causes": ["Dirty or clogged main carburetor jet", "Water in the fuel tank", "Faulty ignition coil or spark plug"],
+    "typical_fix": "Drain and flush the fuel tank, clean the carburetor jets, and replace the spark plug/ignition coil.",
+    "cost_range_inr": "300 - 900",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "engine overheating, engine feels very hot, loss of power when engine heats up",
+    "likely_causes": ["Extremely low engine oil level or degraded oil", "Blocked cooling fins on the engine cylinder block", "Incorrect ignition timing"],
+    "typical_fix": "Perform engine oil change, clean dirt from cylinder cooling fins, and adjust valve clearance/ignition timing.",
+    "cost_range_inr": "350 - 850",
+    "urgency_level": "Fix now"
+  },
+  {
+    "issue_description": "oil leaking under engine, black spots on parking floor, oil stains on engine case",
+    "likely_causes": ["Damaged engine drain bolt washer", "Degraded engine gaskets or rubber O-rings", "Cracked engine crankcase"],
+    "typical_fix": "Replace the drain bolt copper washer, replace leaky gaskets (clutch/magneto cover), or seal engine cracks.",
+    "cost_range_inr": "100 - 1200",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "clicking noise from engine, ticking sound from engine cylinders, valve noise",
+    "likely_causes": ["Loose engine valves (tappets out of adjustment)", "Low engine oil level", "Worn timing chain"],
+    "typical_fix": "Adjust valve tappet clearances to factory spec, top up engine oil, or replace/tension the timing chain.",
+    "cost_range_inr": "250 - 1400",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "engine knocking, metallic tapping sound, loud metallic thuds inside engine",
+    "likely_causes": ["Worn connecting rod bearing (crankshaft play)", "Piston slap due to worn piston/cylinder wall", "Bad fuel quality causing pre-ignition"],
+    "typical_fix": "Perform a complete engine block rebuild, replace connecting rod/crankshaft bearings, or flush tank for high-quality petrol.",
+    "cost_range_inr": "3000 - 8500",
+    "urgency_level": "Fix now"
+  },
+  {
+    "issue_description": "petrol leaking from carburetor, fuel overflow, petrol smell near engine",
+    "likely_causes": ["Stuck float needle valve inside carburetor bowl", "Heavy float block failing to rise", "Dirty or corroded float chamber"],
+    "typical_fix": "Clean the carburetor float bowl, replace the needle valve, and clear out dirt or varnish deposits.",
+    "cost_range_inr": "200 - 450",
+    "urgency_level": "Fix now"
+  },
+  {
+    "issue_description": "chain slipping, clicking noise from chain sprocket, chain making grinding sound",
+    "likely_causes": ["Loose or stretched drive chain", "Dry drive chain lacking lubrication", "Worn out front and rear sprockets"],
+    "typical_fix": "Adjust the chain slackness, lubricate with chain spray, or replace the entire chain and sprocket kit.",
+    "cost_range_inr": "100 - 1800",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "hard gear shifting, gear lever is stiff, gears not shifting smoothly",
+    "likely_causes": ["Low or degraded engine oil", "Incorrectly adjusted clutch cable slackness", "Worn out clutch plates"],
+    "typical_fix": "Replace engine oil with correct grade, adjust clutch cable free-play, or replace the clutch plates and pressure plates.",
+    "cost_range_inr": "350 - 1600",
+    "urgency_level": "Can wait"
+  },
+  {
+    "issue_description": "clutch slipping, engine revs up but bike doesn't accelerate, bike lacks pickup when accelerating",
+    "likely_causes": ["Worn out clutch friction plates", "No free play in clutch cable", "Weak clutch springs"],
+    "typical_fix": "Replace the clutch plates, adjust the clutch cable free-play, and replace clutch pressure springs.",
+    "cost_range_inr": "800 - 1800",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "handlebar wobbling, unstable front wheel, bike pulls to one side, handle feels loose",
+    "likely_causes": ["Worn out steering cone set (t-cone bearings)", "Bent front wheel rim or uneven tyre wear", "Loose steering stem bolt"],
+    "typical_fix": "Replace the steering cone set bearings, true/re-align the front wheel rim, or tighten steering bolts.",
+    "cost_range_inr": "450 - 1200",
+    "urgency_level": "Fix now"
+  },
+  {
+    "issue_description": "hard suspension, bumpy ride, oil leaking from front shock absorbers, front forks bottoming out",
+    "likely_causes": ["Blown front fork oil seals", "Lack of fork oil or degraded fluid", "Worn rear shock absorbers"],
+    "typical_fix": "Replace front fork oil seals, flush and refill fork oil, or replace the rear shock absorber assemblies.",
+    "cost_range_inr": "400 - 2200",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "headlight dim, electrical lights flickering, battery not charging",
+    "likely_causes": ["Faulty voltage regulator rectifier (RR unit)", "Weak battery", "Corroded magneto coil wiring"],
+    "typical_fix": "Replace the RR unit regulator, replace/recharge the battery, or repair magneto stator coils.",
+    "cost_range_inr": "300 - 1800",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "horn not working, weak horn sound, horn squeaks",
+    "likely_causes": ["Corroded horn terminals", "Discharged battery", "Misadjusted horn tone screw"],
+    "typical_fix": "Clean the terminal contacts, adjust the tone tuning screw on the back of the horn, or replace the horn.",
+    "cost_range_inr": "50 - 350",
+    "urgency_level": "Can wait"
+  },
+  {
+    "issue_description": "indicators not working, indicator blinking too fast, indicator stays solid",
+    "likely_causes": ["Faulty indicator flasher relay", "Loose indicator bulb or blown filament", "Corroded indicator switch"],
+    "typical_fix": "Replace the flasher relay, replace the blown bulb, or clean/lubricate the indicator switch assembly.",
+    "cost_range_inr": "50 - 250",
+    "urgency_level": "Can wait"
+  },
+  {
+    "issue_description": "battery discharging quickly, battery dies overnight, self start stops working after parking",
+    "likely_causes": ["Degraded battery plates unable to hold charge", "Short circuit in wiring harness draining battery", "Faulty RR unit failing to charge battery"],
+    "typical_fix": "Replace the battery, inspect wiring harness for short circuit drains, or replace the regulator rectifier.",
+    "cost_range_inr": "950 - 1800",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "sluggish acceleration, lag in pickup, engine gasps when opening throttle",
+    "likely_causes": ["Dirty carburetor carburetor slides or jets", "Dirty fuel filter or fuel line block", "Clogged exhaust muffler"],
+    "typical_fix": "Service and clean the carburetor, replace the inline fuel filter, or clean/replace spark plugs.",
+    "cost_range_inr": "200 - 700",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "squeaking noise from rear suspension, creaking rear spring sound",
+    "likely_causes": ["Lack of lubrication on swingarm bushes", "Dry shock absorber joints or dirt entry"],
+    "typical_fix": "Lubricate the swingarm pivot bushes with grease, and clean/lube shock absorber bush attachments.",
+    "cost_range_inr": "150 - 450",
+    "urgency_level": "Can wait"
+  },
+  {
+    "issue_description": "spark plug carbon buildup, wet spark plug, engine misfires",
+    "likely_causes": ["Fuel mixture is too rich", "Weak ignition coil spark", "Engine oil leaking into combustion chamber"],
+    "typical_fix": "Clean spark plug electrode with sandpaper, adjust fuel mixture screw, or replace spark plug/ignition coil.",
+    "cost_range_inr": "100 - 400",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "rust on exhaust pipe, loud exhaust blowing sound, hole in silencer",
+    "likely_causes": ["Moisture rust eating through metal", "Loose exhaust flange bolts", "Damaged exhaust gasket"],
+    "typical_fix": "Replace the exhaust gasket, tighten flange bolts, weld holes, or apply high-heat anti-rust paint.",
+    "cost_range_inr": "100 - 800",
+    "urgency_level": "Can wait"
+  },
+  {
+    "issue_description": "flat tyre frequently, tyre air pressure leaking, tire loses pressure",
+    "likely_causes": ["Bent tyre valve pin or worn valve neck", "Micro punctures in tubeless tyres", "Worn wheel rim borders leaking air"],
+    "typical_fix": "Replace the tyre valve core, repair tubeless tyre punctures, or seal wheel rim borders.",
+    "cost_range_inr": "100 - 300",
+    "urgency_level": "Fix now"
+  },
+  {
+    "issue_description": "engine vibration at high speeds, body rattling at high speeds, loose bike panels",
+    "likely_causes": ["Loose engine mounting bolts", "Unbalanced wheels or worn swingarm bushes", "Broken plastic panel clips"],
+    "typical_fix": "Tighten all engine mounting chassis bolts, replace swingarm bushes, and secure body panels with rubber dampers.",
+    "cost_range_inr": "150 - 750",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "speedometer not working, speed needle stuck, odometer not updating",
+    "likely_causes": ["Broken inner speedometer wire/cable", "Worn out speed gear box at front wheel hub", "Faulty speedometer gauge assembly"],
+    "typical_fix": "Replace the speedometer inner cable, replace the front wheel speed gear kit, or inspect gauge connections.",
+    "cost_range_inr": "100 - 450",
+    "urgency_level": "Can wait"
+  },
+  {
+    "issue_description": "fuel gauge showing wrong level, fuel indicator not working",
+    "likely_causes": ["Faulty fuel tank sending float unit", "Short circuit in fuel indicator wiring", "Stuck gauge needle"],
+    "typical_fix": "Clean or replace the fuel tank sensor float assembly, and verify gauge connector continuity.",
+    "cost_range_inr": "250 - 650",
+    "urgency_level": "Can wait"
+  },
+  {
+    "issue_description": "cold start issues, hard to start in morning, engine crank but no start in winter",
+    "likely_causes": ["Incorrect spark plug gap or carbon deposits", "Choke valve not engaging properly", "Too thick engine oil grade"],
+    "typical_fix": "Clean and re-gap the spark plug, adjust choke cable, and swap engine oil to manufacturer specified grade (e.g. 10W-30).",
+    "cost_range_inr": "150 - 550",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "kick starter slipping, kick lever loose, hard to kick start",
+    "likely_causes": ["Worn kick ratchet pinion gear", "Weak kick lever return spring", "Worn out clutch plates causing kick slip"],
+    "typical_fix": "Replace the kick ratchet gear, replace the kick return spring, or overhaul/replace the clutch plates.",
+    "cost_range_inr": "300 - 1500",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "key cylinder loose, ignition key falling out, key doesnt turn switch",
+    "likely_causes": ["Worn out ignition lock key tumbler", "Bent ignition key"],
+    "typical_fix": "Replace the complete key lock set (ignition, fuel cap, seat lock) or rebuild tumbler pins.",
+    "cost_range_inr": "400 - 950",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "engine missing fire, engine hesitates, bike makes puffing sounds",
+    "likely_causes": ["Water entry in spark plug cap", "Degraded ignition coil", "Dirty fuel supply line"],
+    "typical_fix": "Blow air to dry out the spark plug cap, inspect/replace the HT coil, and clean the petrol strainer.",
+    "cost_range_inr": "100 - 600",
+    "urgency_level": "Fix this week"
+  },
+  {
+    "issue_description": "front tyre wearing unevenly, bike handles weird in turns",
+    "likely_causes": ["Unbalanced wheel rim", "Bent front forks", "Worn out wheel bearings"],
+    "typical_fix": "Perform wheel alignment/balancing, inspect and align front fork tubes, or replace front wheel bearings.",
+    "cost_range_inr": "200 - 1200",
+    "urgency_level": "Fix this week"
+  }
+]

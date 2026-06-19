@@ -152,27 +152,96 @@ app.post('/api/symptom-check', async (req, res) => {
       });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      console.warn("ANTHROPIC_API_KEY is not configured. Using rule-based fallback.");
-      const top = topMatches[0];
-      return res.json({
-        match_found: true,
-        diagnoses: [
-          {
-            cause: top.likely_causes[0],
-            probability: "High",
-            typical_fix: top.typical_fix,
-            cost_range_inr: top.cost_range_inr,
-            urgency_level: top.urgency_level
-          }
-        ],
-        recommendation: "Here is the closest match from our database. Please book a service to have it verified.",
-        cta: "Book a service with SD Hero"
-      });
-    }
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    const claudeApiKey = process.env.ANTHROPIC_API_KEY;
 
-    const systemPrompt = `You are an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
+    if (geminiApiKey) {
+      console.log("Processing symptom check using Gemini API...");
+      const systemPrompt = `You are an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
+Your task is to analyze the customer's bike symptom description and provide a diagnosis using ONLY the provided symptom database context.
+Do NOT invent any causes, costs, or urgency levels. You must strictly base your diagnosis on the provided context matches.
+
+Context (Matches from our symptom database):
+${JSON.stringify(topMatches, null, 2)}
+
+Instructions:
+1. Compare the customer's description with the provided context entries.
+2. If one or more context entries are relevant to the customer's problem, select the top 2-3 most likely causes, rank them by probability, and extract their costs and urgency levels from the matched context.
+3. If NONE of the provided context entries match or are relevant to the customer's description, or if the customer's query is completely unrelated to two-wheeler mechanical/electrical issues, you MUST return match_found = false.`;
+
+      const responseSchema = {
+        type: "object",
+        properties: {
+          match_found: { type: "boolean" },
+          diagnoses: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                cause: { type: "string" },
+                probability: { type: "string", enum: ["High", "Medium", "Low"] },
+                typical_fix: { type: "string" },
+                cost_range_inr: { type: "string" },
+                urgency_level: { type: "string", enum: ["Fix now", "Fix this week", "Can wait"] }
+              },
+              required: ["cause", "probability", "typical_fix", "cost_range_inr", "urgency_level"]
+            }
+          },
+          recommendation: { type: "string" },
+          cta: { type: "string" }
+        },
+        required: ["match_found", "recommendation", "cta"]
+      };
+
+      const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text: `${systemPrompt}\n\nCustomer symptom description: "${trimmedQuery}"`
+                }
+              ]
+            }
+          ],
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: responseSchema
+          }
+        })
+      });
+
+      if (!apiResponse.ok) {
+        const errText = await apiResponse.text();
+        console.error('Gemini API error response:', errText);
+        throw new Error(`Gemini API call failed with status ${apiResponse.status}`);
+      }
+
+      const apiData = await apiResponse.json();
+      const content = apiData.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!content) {
+        throw new Error('Empty response from Gemini API');
+      }
+
+      try {
+        const result = JSON.parse(content.trim());
+        return res.json(result);
+      } catch (parseError) {
+        console.error('Failed to parse Gemini response:', content, parseError);
+        return res.json({
+          match_found: false,
+          recommendation: "We had trouble analyzing your symptom description. Please describe it differently or book a physical inspection.",
+          cta: "Book an inspection"
+        });
+      }
+    } else if (claudeApiKey) {
+      console.log("Processing symptom check using Claude API...");
+      const systemPrompt = `You are an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
 Your task is to analyze the customer's bike symptom description and provide a diagnosis using ONLY the provided symptom database context.
 Do NOT invent any causes, costs, or urgency levels. You must strictly base your diagnosis on the provided context matches.
 
@@ -207,47 +276,65 @@ Instructions:
 
 Ensure the output is ONLY the JSON block. Do not include any conversational filler, markdown formatting (no \`\`\`json blocks), or extra text outside the JSON object.`;
 
-    const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20240620',
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: [
+      const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': claudeApiKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'claude-3-5-sonnet-20240620',
+          max_tokens: 1024,
+          system: systemPrompt,
+          messages: [
+            {
+              role: 'user',
+              content: `Customer symptom description: "${trimmedQuery}"`
+            }
+          ]
+        })
+      });
+
+      if (!apiResponse.ok) {
+        const errText = await apiResponse.text();
+        console.error('Claude API error response:', errText);
+        throw new Error(`Claude API call failed with status ${apiResponse.status}`);
+      }
+
+      const apiData = await apiResponse.json();
+      const content = apiData.content?.[0]?.text;
+      if (!content) {
+        throw new Error('Empty response from Claude API');
+      }
+
+      try {
+        const result = cleanAndParseJson(content);
+        return res.json(result);
+      } catch (parseError) {
+        console.error('Failed to parse Claude response:', content, parseError);
+        return res.json({
+          match_found: false,
+          recommendation: "We had trouble analyzing your symptom description. Please describe it differently or book a physical inspection.",
+          cta: "Book an inspection"
+        });
+      }
+    } else {
+      console.warn("Neither GEMINI_API_KEY nor ANTHROPIC_API_KEY is configured. Using rule-based fallback.");
+      const top = topMatches[0];
+      return res.json({
+        match_found: true,
+        diagnoses: [
           {
-            role: 'user',
-            content: `Customer symptom description: "${trimmedQuery}"`
+            cause: top.likely_causes[0],
+            probability: "High",
+            typical_fix: top.typical_fix,
+            cost_range_inr: top.cost_range_inr,
+            urgency_level: top.urgency_level
           }
-        ]
-      })
-    });
-
-    if (!apiResponse.ok) {
-      const errText = await apiResponse.text();
-      console.error('Claude API error response:', errText);
-      throw new Error(`Claude API call failed with status ${apiResponse.status}`);
-    }
-
-    const apiData = await apiResponse.json();
-    const content = apiData.content?.[0]?.text;
-    if (!content) {
-      throw new Error('Empty response from Claude API');
-    }
-
-    try {
-      const result = cleanAndParseJson(content);
-      res.json(result);
-    } catch (parseError) {
-      console.error('Failed to parse Claude response:', content, parseError);
-      res.json({
-        match_found: false,
-        recommendation: "We had trouble analyzing your symptom description. Please describe it differently or book a physical inspection.",
-        cta: "Book an inspection"
+        ],
+        recommendation: "Here is the closest match from our database. Please book a service to have it verified.",
+        cta: "Book a service with SD Hero"
       });
     }
 

@@ -2980,6 +2980,13 @@ footer {
   fill: var(--accent);
 }
 
+.symptom-chat-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 .symptom-chat-title h4 {
   font-family: var(--font-heading);
   font-size: 1rem;

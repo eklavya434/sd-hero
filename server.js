@@ -100,51 +100,66 @@ function cleanAndParseJson(text) {
 // Symptom Checker AI Endpoint
 app.post('/api/symptom-check', async (req, res) => {
   try {
-    const { query } = req.body;
-    if (!query || typeof query !== 'string') {
-      return res.status(400).json({ error: 'Query string is required.' });
+    const { query, image } = req.body;
+    let trimmedQuery = '';
+    if (query && typeof query === 'string') {
+      trimmedQuery = query.trim().substring(0, 500);
     }
 
-    const trimmedQuery = query.trim().substring(0, 500);
-    if (!trimmedQuery) {
-      return res.status(400).json({ error: 'Query cannot be empty.' });
+    if (!trimmedQuery && !image) {
+      return res.status(400).json({ error: 'Either query string or image is required.' });
     }
 
-    // Token-overlap keyword matching
-    const queryTokens = tokenize(trimmedQuery).filter(w => !STOP_WORDS.has(w));
-    const activeTokens = queryTokens.length > 0 ? queryTokens : tokenize(trimmedQuery);
+    // Determine the matches
+    let contextEntries = [];
+    const hasApiKey = process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY;
 
-    const scored = symptomKnowledgeBase.map(entry => {
-      let score = 0;
-      const descTokens = tokenize(entry.issue_description);
-      const causeTokens = entry.likely_causes.flatMap(c => tokenize(c));
-      const fixTokens = tokenize(entry.typical_fix);
+    if (image || !trimmedQuery) {
+      // For images or visual inspection, always supply the entire database
+      contextEntries = symptomKnowledgeBase;
+    } else {
+      // Token-overlap keyword matching for text query
+      const queryTokens = tokenize(trimmedQuery).filter(w => !STOP_WORDS.has(w));
+      const activeTokens = queryTokens.length > 0 ? queryTokens : tokenize(trimmedQuery);
 
-      for (const q of activeTokens) {
-        if (descTokens.includes(q)) {
-          score += 3;
-        } else if (descTokens.some(d => d.includes(q) || q.includes(d))) {
-          score += 1.5;
+      const scored = symptomKnowledgeBase.map(entry => {
+        let score = 0;
+        const descTokens = tokenize(entry.issue_description);
+        const causeTokens = entry.likely_causes.flatMap(c => tokenize(c));
+        const fixTokens = tokenize(entry.typical_fix);
+
+        for (const q of activeTokens) {
+          if (descTokens.includes(q)) {
+            score += 3;
+          } else if (descTokens.some(d => d.includes(q) || q.includes(d))) {
+            score += 1.5;
+          }
+          if (causeTokens.includes(q)) {
+            score += 2;
+          } else if (causeTokens.some(c => c.includes(q) || q.includes(c))) {
+            score += 1;
+          }
+          if (fixTokens.includes(q)) {
+            score += 1;
+          }
         }
-        if (causeTokens.includes(q)) {
-          score += 2;
-        } else if (causeTokens.some(c => c.includes(q) || q.includes(c))) {
-          score += 1;
-        }
-        if (fixTokens.includes(q)) {
-          score += 1;
-        }
+        return { entry, score };
+      });
+
+      const sorted = scored.sort((a, b) => b.score - a.score);
+      contextEntries = sorted
+        .filter(item => item.score > 0)
+        .slice(0, 4)
+        .map(item => item.entry);
+
+      // Fallback: If no direct keyword overlap but we have API keys,
+      // supply the full database to let LLM perform semantic match
+      if (contextEntries.length === 0 && hasApiKey) {
+        contextEntries = symptomKnowledgeBase;
       }
-      return { entry, score };
-    });
+    }
 
-    const sorted = scored.sort((a, b) => b.score - a.score);
-    const topMatches = sorted
-      .filter(item => item.score > 0)
-      .slice(0, 4)
-      .map(item => item.entry);
-
-    if (topMatches.length === 0) {
+    if (contextEntries.length === 0) {
       return res.json({
         match_found: false,
         recommendation: "We couldn't find a direct match for your symptom in our database. Since safety is our top priority, we recommend bringing your bike to our Patna workshop for a physical inspection by our expert technicians.",
@@ -156,18 +171,18 @@ app.post('/api/symptom-check', async (req, res) => {
     const claudeApiKey = process.env.ANTHROPIC_API_KEY;
 
     if (geminiApiKey) {
-      console.log("Processing symptom check using Gemini API...");
+      console.log("Processing symptom check using Gemini API (multimodal)...");
       const systemPrompt = `You are an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
-Your task is to analyze the customer's bike symptom description and provide a diagnosis using ONLY the provided symptom database context.
+Your task is to analyze the customer's bike symptom description (and optional image if provided) and provide a diagnosis using ONLY the provided symptom database context.
 Do NOT invent any causes, costs, or urgency levels. You must strictly base your diagnosis on the provided context matches.
 
 Context (Matches from our symptom database):
-${JSON.stringify(topMatches, null, 2)}
+${JSON.stringify(contextEntries, null, 2)}
 
 Instructions:
-1. Compare the customer's description with the provided context entries.
+1. Compare the customer's description and/or image with the provided context entries.
 2. If one or more context entries are relevant to the customer's problem, select the top 2-3 most likely causes, rank them by probability, and extract their costs and urgency levels from the matched context.
-3. If NONE of the provided context entries match or are relevant to the customer's description, or if the customer's query is completely unrelated to two-wheeler mechanical/electrical issues, you MUST return match_found = false.`;
+3. If NONE of the provided context entries match or are relevant to the customer's description/image, or if the query is completely unrelated to two-wheeler issues, you MUST return match_found = false.`;
 
       const responseSchema = {
         type: "object",
@@ -193,6 +208,20 @@ Instructions:
         required: ["match_found", "recommendation", "cta"]
       };
 
+      const parts = [];
+      parts.push({
+        text: `${systemPrompt}\n\nCustomer symptom description: "${trimmedQuery || 'Visual inspection request (see attached photo).'}"`
+      });
+
+      if (image && image.data && image.mimeType) {
+        parts.push({
+          inlineData: {
+            mimeType: image.mimeType,
+            data: image.data
+          }
+        });
+      }
+
       const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`, {
         method: 'POST',
         headers: {
@@ -202,11 +231,7 @@ Instructions:
           contents: [
             {
               role: 'user',
-              parts: [
-                {
-                  text: `${systemPrompt}\n\nCustomer symptom description: "${trimmedQuery}"`
-                }
-              ]
+              parts: parts
             }
           ],
           generationConfig: {
@@ -240,16 +265,16 @@ Instructions:
         });
       }
     } else if (claudeApiKey) {
-      console.log("Processing symptom check using Claude API...");
+      console.log("Processing symptom check using Claude API (multimodal)...");
       const systemPrompt = `You are an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
-Your task is to analyze the customer's bike symptom description and provide a diagnosis using ONLY the provided symptom database context.
+Your task is to analyze the customer's bike symptom description (and optional image if provided) and provide a diagnosis using ONLY the provided symptom database context.
 Do NOT invent any causes, costs, or urgency levels. You must strictly base your diagnosis on the provided context matches.
 
 Context (Matches from our symptom database):
-${JSON.stringify(topMatches, null, 2)}
+${JSON.stringify(contextEntries, null, 2)}
 
 Instructions:
-1. Compare the customer's description with the provided context entries.
+1. Compare the customer's description and/or image with the provided context entries.
 2. If one or more context entries are relevant to the customer's problem, select the top 2-3 most likely causes, rank them by probability, and extract their costs and urgency levels from the matched context.
 3. You must format your response as a strict JSON object with the following structure:
 {
@@ -267,7 +292,7 @@ Instructions:
   "cta": "Book a service with SD Hero today to get your bike inspected by our expert mechanics."
 }
 
-4. If NONE of the provided context entries match or are relevant to the customer's description, or if the customer's query is completely unrelated to two-wheeler mechanical/electrical issues, you MUST return:
+4. If NONE of the provided context entries match or are relevant to the customer's description/image, or if the query is completely unrelated to two-wheeler issues, you MUST return:
 {
   "match_found": false,
   "recommendation": "We couldn't find a direct match for your symptom in our database. Since safety is our top priority, we recommend bringing your bike to our Patna workshop for a physical inspection by our expert technicians.",
@@ -275,6 +300,22 @@ Instructions:
 }
 
 Ensure the output is ONLY the JSON block. Do not include any conversational filler, markdown formatting (no \`\`\`json blocks), or extra text outside the JSON object.`;
+
+      const contentBlocks = [];
+      if (image && image.data && image.mimeType) {
+        contentBlocks.push({
+          type: "image",
+          source: {
+            type: "base64",
+            media_type: image.mimeType,
+            data: image.data
+          }
+        });
+      }
+      contentBlocks.push({
+        type: "text",
+        text: `Customer symptom description: "${trimmedQuery || 'Visual inspection request (see attached photo).'}"`
+      });
 
       const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
@@ -290,7 +331,7 @@ Ensure the output is ONLY the JSON block. Do not include any conversational fill
           messages: [
             {
               role: 'user',
-              content: `Customer symptom description: "${trimmedQuery}"`
+              content: contentBlocks
             }
           ]
         })
@@ -321,7 +362,7 @@ Ensure the output is ONLY the JSON block. Do not include any conversational fill
       }
     } else {
       console.warn("Neither GEMINI_API_KEY nor ANTHROPIC_API_KEY is configured. Using rule-based fallback.");
-      const top = topMatches[0];
+      const top = contextEntries[0];
       return res.json({
         match_found: true,
         diagnoses: [

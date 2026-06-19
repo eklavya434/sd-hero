@@ -602,51 +602,66 @@ function cleanAndParseJson(text) {
 // Symptom Checker AI Endpoint
 app.post(&#039;/api/symptom-check&#039;, async (req, res) =&gt; {
   try {
-    const { query } = req.body;
-    if (!query || typeof query !== &#039;string&#039;) {
-      return res.status(400).json({ error: &#039;Query string is required.&#039; });
+    const { query, image } = req.body;
+    let trimmedQuery = &#039;&#039;;
+    if (query &amp;&amp; typeof query === &#039;string&#039;) {
+      trimmedQuery = query.trim().substring(0, 500);
     }
 
-    const trimmedQuery = query.trim().substring(0, 500);
-    if (!trimmedQuery) {
-      return res.status(400).json({ error: &#039;Query cannot be empty.&#039; });
+    if (!trimmedQuery &amp;&amp; !image) {
+      return res.status(400).json({ error: &#039;Either query string or image is required.&#039; });
     }
 
-    // Token-overlap keyword matching
-    const queryTokens = tokenize(trimmedQuery).filter(w =&gt; !STOP_WORDS.has(w));
-    const activeTokens = queryTokens.length &gt; 0 ? queryTokens : tokenize(trimmedQuery);
+    // Determine the matches
+    let contextEntries = [];
+    const hasApiKey = process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY;
 
-    const scored = symptomKnowledgeBase.map(entry =&gt; {
-      let score = 0;
-      const descTokens = tokenize(entry.issue_description);
-      const causeTokens = entry.likely_causes.flatMap(c =&gt; tokenize(c));
-      const fixTokens = tokenize(entry.typical_fix);
+    if (image || !trimmedQuery) {
+      // For images or visual inspection, always supply the entire database
+      contextEntries = symptomKnowledgeBase;
+    } else {
+      // Token-overlap keyword matching for text query
+      const queryTokens = tokenize(trimmedQuery).filter(w =&gt; !STOP_WORDS.has(w));
+      const activeTokens = queryTokens.length &gt; 0 ? queryTokens : tokenize(trimmedQuery);
 
-      for (const q of activeTokens) {
-        if (descTokens.includes(q)) {
-          score += 3;
-        } else if (descTokens.some(d =&gt; d.includes(q) || q.includes(d))) {
-          score += 1.5;
+      const scored = symptomKnowledgeBase.map(entry =&gt; {
+        let score = 0;
+        const descTokens = tokenize(entry.issue_description);
+        const causeTokens = entry.likely_causes.flatMap(c =&gt; tokenize(c));
+        const fixTokens = tokenize(entry.typical_fix);
+
+        for (const q of activeTokens) {
+          if (descTokens.includes(q)) {
+            score += 3;
+          } else if (descTokens.some(d =&gt; d.includes(q) || q.includes(d))) {
+            score += 1.5;
+          }
+          if (causeTokens.includes(q)) {
+            score += 2;
+          } else if (causeTokens.some(c =&gt; c.includes(q) || q.includes(c))) {
+            score += 1;
+          }
+          if (fixTokens.includes(q)) {
+            score += 1;
+          }
         }
-        if (causeTokens.includes(q)) {
-          score += 2;
-        } else if (causeTokens.some(c =&gt; c.includes(q) || q.includes(c))) {
-          score += 1;
-        }
-        if (fixTokens.includes(q)) {
-          score += 1;
-        }
+        return { entry, score };
+      });
+
+      const sorted = scored.sort((a, b) =&gt; b.score - a.score);
+      contextEntries = sorted
+        .filter(item =&gt; item.score &gt; 0)
+        .slice(0, 4)
+        .map(item =&gt; item.entry);
+
+      // Fallback: If no direct keyword overlap but we have API keys,
+      // supply the full database to let LLM perform semantic match
+      if (contextEntries.length === 0 &amp;&amp; hasApiKey) {
+        contextEntries = symptomKnowledgeBase;
       }
-      return { entry, score };
-    });
+    }
 
-    const sorted = scored.sort((a, b) =&gt; b.score - a.score);
-    const topMatches = sorted
-      .filter(item =&gt; item.score &gt; 0)
-      .slice(0, 4)
-      .map(item =&gt; item.entry);
-
-    if (topMatches.length === 0) {
+    if (contextEntries.length === 0) {
       return res.json({
         match_found: false,
         recommendation: &quot;We couldn&#039;t find a direct match for your symptom in our database. Since safety is our top priority, we recommend bringing your bike to our Patna workshop for a physical inspection by our expert technicians.&quot;,
@@ -654,35 +669,114 @@ app.post(&#039;/api/symptom-check&#039;, async (req, res) =&gt; {
       });
     }
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
-      console.warn(&quot;ANTHROPIC_API_KEY is not configured. Using rule-based fallback.&quot;);
-      const top = topMatches[0];
-      return res.json({
-        match_found: true,
-        diagnoses: [
-          {
-            cause: top.likely_causes[0],
-            probability: &quot;High&quot;,
-            typical_fix: top.typical_fix,
-            cost_range_inr: top.cost_range_inr,
-            urgency_level: top.urgency_level
-          }
-        ],
-        recommendation: &quot;Here is the closest match from our database. Please book a service to have it verified.&quot;,
-        cta: &quot;Book a service with SD Hero&quot;
-      });
-    }
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    const claudeApiKey = process.env.ANTHROPIC_API_KEY;
 
-    const systemPrompt = `You are an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
-Your task is to analyze the customer&#039;s bike symptom description and provide a diagnosis using ONLY the provided symptom database context.
+    if (geminiApiKey) {
+      console.log(&quot;Processing symptom check using Gemini API (multimodal)...&quot;);
+      const systemPrompt = `You are an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
+Your task is to analyze the customer&#039;s bike symptom description (and optional image if provided) and provide a diagnosis using ONLY the provided symptom database context.
 Do NOT invent any causes, costs, or urgency levels. You must strictly base your diagnosis on the provided context matches.
 
 Context (Matches from our symptom database):
-${JSON.stringify(topMatches, null, 2)}
+${JSON.stringify(contextEntries, null, 2)}
 
 Instructions:
-1. Compare the customer&#039;s description with the provided context entries.
+1. Compare the customer&#039;s description and/or image with the provided context entries.
+2. If one or more context entries are relevant to the customer&#039;s problem, select the top 2-3 most likely causes, rank them by probability, and extract their costs and urgency levels from the matched context.
+3. If NONE of the provided context entries match or are relevant to the customer&#039;s description/image, or if the query is completely unrelated to two-wheeler issues, you MUST return match_found = false.`;
+
+      const responseSchema = {
+        type: &quot;object&quot;,
+        properties: {
+          match_found: { type: &quot;boolean&quot; },
+          diagnoses: {
+            type: &quot;array&quot;,
+            items: {
+              type: &quot;object&quot;,
+              properties: {
+                cause: { type: &quot;string&quot; },
+                probability: { type: &quot;string&quot;, enum: [&quot;High&quot;, &quot;Medium&quot;, &quot;Low&quot;] },
+                typical_fix: { type: &quot;string&quot; },
+                cost_range_inr: { type: &quot;string&quot; },
+                urgency_level: { type: &quot;string&quot;, enum: [&quot;Fix now&quot;, &quot;Fix this week&quot;, &quot;Can wait&quot;] }
+              },
+              required: [&quot;cause&quot;, &quot;probability&quot;, &quot;typical_fix&quot;, &quot;cost_range_inr&quot;, &quot;urgency_level&quot;]
+            }
+          },
+          recommendation: { type: &quot;string&quot; },
+          cta: { type: &quot;string&quot; }
+        },
+        required: [&quot;match_found&quot;, &quot;recommendation&quot;, &quot;cta&quot;]
+      };
+
+      const parts = [];
+      parts.push({
+        text: `${systemPrompt}\n\nCustomer symptom description: &quot;${trimmedQuery || &#039;Visual inspection request (see attached photo).&#039;}&quot;`
+      });
+
+      if (image &amp;&amp; image.data &amp;&amp; image.mimeType) {
+        parts.push({
+          inlineData: {
+            mimeType: image.mimeType,
+            data: image.data
+          }
+        });
+      }
+
+      const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`, {
+        method: &#039;POST&#039;,
+        headers: {
+          &#039;content-type&#039;: &#039;application/json&#039;
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: &#039;user&#039;,
+              parts: parts
+            }
+          ],
+          generationConfig: {
+            responseMimeType: &quot;application/json&quot;,
+            responseSchema: responseSchema
+          }
+        })
+      });
+
+      if (!apiResponse.ok) {
+        const errText = await apiResponse.text();
+        console.error(&#039;Gemini API error response:&#039;, errText);
+        throw new Error(`Gemini API call failed with status ${apiResponse.status}`);
+      }
+
+      const apiData = await apiResponse.json();
+      const content = apiData.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!content) {
+        throw new Error(&#039;Empty response from Gemini API&#039;);
+      }
+
+      try {
+        const result = JSON.parse(content.trim());
+        return res.json(result);
+      } catch (parseError) {
+        console.error(&#039;Failed to parse Gemini response:&#039;, content, parseError);
+        return res.json({
+          match_found: false,
+          recommendation: &quot;We had trouble analyzing your symptom description. Please describe it differently or book a physical inspection.&quot;,
+          cta: &quot;Book an inspection&quot;
+        });
+      }
+    } else if (claudeApiKey) {
+      console.log(&quot;Processing symptom check using Claude API (multimodal)...&quot;);
+      const systemPrompt = `You are an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
+Your task is to analyze the customer&#039;s bike symptom description (and optional image if provided) and provide a diagnosis using ONLY the provided symptom database context.
+Do NOT invent any causes, costs, or urgency levels. You must strictly base your diagnosis on the provided context matches.
+
+Context (Matches from our symptom database):
+${JSON.stringify(contextEntries, null, 2)}
+
+Instructions:
+1. Compare the customer&#039;s description and/or image with the provided context entries.
 2. If one or more context entries are relevant to the customer&#039;s problem, select the top 2-3 most likely causes, rank them by probability, and extract their costs and urgency levels from the matched context.
 3. You must format your response as a strict JSON object with the following structure:
 {
@@ -700,7 +794,7 @@ Instructions:
   &quot;cta&quot;: &quot;Book a service with SD Hero today to get your bike inspected by our expert mechanics.&quot;
 }
 
-4. If NONE of the provided context entries match or are relevant to the customer&#039;s description, or if the customer&#039;s query is completely unrelated to two-wheeler mechanical/electrical issues, you MUST return:
+4. If NONE of the provided context entries match or are relevant to the customer&#039;s description/image, or if the query is completely unrelated to two-wheeler issues, you MUST return:
 {
   &quot;match_found&quot;: false,
   &quot;recommendation&quot;: &quot;We couldn&#039;t find a direct match for your symptom in our database. Since safety is our top priority, we recommend bringing your bike to our Patna workshop for a physical inspection by our expert technicians.&quot;,
@@ -709,47 +803,81 @@ Instructions:
 
 Ensure the output is ONLY the JSON block. Do not include any conversational filler, markdown formatting (no \`\`\`json blocks), or extra text outside the JSON object.`;
 
-    const apiResponse = await fetch(&#039;https://api.anthropic.com/v1/messages&#039;, {
-      method: &#039;POST&#039;,
-      headers: {
-        &#039;x-api-key&#039;: apiKey,
-        &#039;anthropic-version&#039;: &#039;2023-06-01&#039;,
-        &#039;content-type&#039;: &#039;application/json&#039;
-      },
-      body: JSON.stringify({
-        model: &#039;claude-3-5-sonnet-20240620&#039;,
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: [
-          {
-            role: &#039;user&#039;,
-            content: `Customer symptom description: &quot;${trimmedQuery}&quot;`
+      const contentBlocks = [];
+      if (image &amp;&amp; image.data &amp;&amp; image.mimeType) {
+        contentBlocks.push({
+          type: &quot;image&quot;,
+          source: {
+            type: &quot;base64&quot;,
+            media_type: image.mimeType,
+            data: image.data
           }
-        ]
-      })
-    });
+        });
+      }
+      contentBlocks.push({
+        type: &quot;text&quot;,
+        text: `Customer symptom description: &quot;${trimmedQuery || &#039;Visual inspection request (see attached photo).&#039;}&quot;`
+      });
 
-    if (!apiResponse.ok) {
-      const errText = await apiResponse.text();
-      console.error(&#039;Claude API error response:&#039;, errText);
-      throw new Error(`Claude API call failed with status ${apiResponse.status}`);
-    }
+      const apiResponse = await fetch(&#039;https://api.anthropic.com/v1/messages&#039;, {
+        method: &#039;POST&#039;,
+        headers: {
+          &#039;x-api-key&#039;: claudeApiKey,
+          &#039;anthropic-version&#039;: &#039;2023-06-01&#039;,
+          &#039;content-type&#039;: &#039;application/json&#039;
+        },
+        body: JSON.stringify({
+          model: &#039;claude-3-5-sonnet-20240620&#039;,
+          max_tokens: 1024,
+          system: systemPrompt,
+          messages: [
+            {
+              role: &#039;user&#039;,
+              content: contentBlocks
+            }
+          ]
+        })
+      });
 
-    const apiData = await apiResponse.json();
-    const content = apiData.content?.[0]?.text;
-    if (!content) {
-      throw new Error(&#039;Empty response from Claude API&#039;);
-    }
+      if (!apiResponse.ok) {
+        const errText = await apiResponse.text();
+        console.error(&#039;Claude API error response:&#039;, errText);
+        throw new Error(`Claude API call failed with status ${apiResponse.status}`);
+      }
 
-    try {
-      const result = cleanAndParseJson(content);
-      res.json(result);
-    } catch (parseError) {
-      console.error(&#039;Failed to parse Claude response:&#039;, content, parseError);
-      res.json({
-        match_found: false,
-        recommendation: &quot;We had trouble analyzing your symptom description. Please describe it differently or book a physical inspection.&quot;,
-        cta: &quot;Book an inspection&quot;
+      const apiData = await apiResponse.json();
+      const content = apiData.content?.[0]?.text;
+      if (!content) {
+        throw new Error(&#039;Empty response from Claude API&#039;);
+      }
+
+      try {
+        const result = cleanAndParseJson(content);
+        return res.json(result);
+      } catch (parseError) {
+        console.error(&#039;Failed to parse Claude response:&#039;, content, parseError);
+        return res.json({
+          match_found: false,
+          recommendation: &quot;We had trouble analyzing your symptom description. Please describe it differently or book a physical inspection.&quot;,
+          cta: &quot;Book an inspection&quot;
+        });
+      }
+    } else {
+      console.warn(&quot;Neither GEMINI_API_KEY nor ANTHROPIC_API_KEY is configured. Using rule-based fallback.&quot;);
+      const top = contextEntries[0];
+      return res.json({
+        match_found: true,
+        diagnoses: [
+          {
+            cause: top.likely_causes[0],
+            probability: &quot;High&quot;,
+            typical_fix: top.typical_fix,
+            cost_range_inr: top.cost_range_inr,
+            urgency_level: top.urgency_level
+          }
+        ],
+        recommendation: &quot;Here is the closest match from our database. Please book a service to have it verified.&quot;,
+        cta: &quot;Book a service with SD Hero&quot;
       });
     }
 
@@ -5192,6 +5320,95 @@ footer {
   width: 18px;
   height: 18px;
   fill: #fff;
+}
+
+/* Image Preview &amp; Attachment Styles for Symptom Checker */
+.symptom-chat-preview-container {
+  display: none;
+  padding: 0.5rem 1rem;
+  background: var(--bg-tertiary);
+  border-top: 1px solid var(--border-color);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.symptom-chat-preview-container.show {
+  display: flex;
+}
+
+.symptom-chat-preview-wrapper {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.symptom-chat-preview-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+}
+
+.symptom-chat-preview-remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.symptom-chat-attach-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast);
+}
+
+.symptom-chat-attach-btn:hover {
+  transform: scale(1.05);
+}
+
+.symptom-chat-attach-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--text-muted);
+  transition: fill var(--transition-fast);
+}
+
+.symptom-chat-attach-btn:hover svg {
+  fill: var(--accent);
+}
+
+.symptom-chat-image-bubble {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  margin-top: 0.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.symptom-chat-image-bubble img {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
 }
 
 

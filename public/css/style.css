@@ -3256,5 +3256,94 @@ footer {
   fill: #fff;
 }
 
+/* Image Preview & Attachment Styles for Symptom Checker */
+.symptom-chat-preview-container {
+  display: none;
+  padding: 0.5rem 1rem;
+  background: var(--bg-tertiary);
+  border-top: 1px solid var(--border-color);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.symptom-chat-preview-container.show {
+  display: flex;
+}
+
+.symptom-chat-preview-wrapper {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.symptom-chat-preview-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+}
+
+.symptom-chat-preview-remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.symptom-chat-attach-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast);
+}
+
+.symptom-chat-attach-btn:hover {
+  transform: scale(1.05);
+}
+
+.symptom-chat-attach-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--text-muted);
+  transition: fill var(--transition-fast);
+}
+
+.symptom-chat-attach-btn:hover svg {
+  fill: var(--accent);
+}
+
+.symptom-chat-image-bubble {
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  margin-top: 0.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.symptom-chat-image-bubble img {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
+}
+
 
 

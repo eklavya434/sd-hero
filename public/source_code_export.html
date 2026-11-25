@@ -674,7 +674,7 @@ app.post(&#039;/api/symptom-check&#039;, async (req, res) =&gt; {
 
     if (geminiApiKey) {
       console.log(&quot;Processing symptom check using Gemini API (multimodal)...&quot;);
-      const systemPrompt = `You are an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
+      const systemPrompt = `You are Devi, an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
 Your task is to analyze the customer&#039;s bike symptom description (and optional image if provided) and provide a diagnosis using ONLY the provided symptom database context.
 Do NOT invent any causes, costs, or urgency levels. You must strictly base your diagnosis on the provided context matches.
 
@@ -768,7 +768,7 @@ Instructions:
       }
     } else if (claudeApiKey) {
       console.log(&quot;Processing symptom check using Claude API (multimodal)...&quot;);
-      const systemPrompt = `You are an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
+      const systemPrompt = `You are Devi, an expert bike mechanic assistant for SD Hero Service, a premium two-wheeler garage in Patna.
 Your task is to analyze the customer&#039;s bike symptom description (and optional image if provided) and provide a diagnosis using ONLY the provided symptom database context.
 Do NOT invent any causes, costs, or urgency levels. You must strictly base your diagnosis on the provided context matches.
 
@@ -1607,7 +1607,7 @@ export default app;
               &lt;div class=&quot;info-icon&quot;&gt;📍&lt;/div&gt;
               &lt;div class=&quot;info-text&quot;&gt;
                 &lt;h4&gt;Service Centre Location&lt;/h4&gt;
-                &lt;p&gt;Prithviraj Chowk, Opposite Laxmi Uma Plaza, East Lohanipur, Patna 800003&lt;/p&gt;
+                &lt;p&gt;Prithviraj Chowk, Das Ln, East Lohanipur, Kadamkuan, Patna 800001&lt;/p&gt;
               &lt;/div&gt;
             &lt;/div&gt;
             &lt;div class=&quot;info-item&quot;&gt;
@@ -1929,7 +1929,8 @@ export default app;
             &lt;div class=&quot;contact-card-icon&quot;&gt;📍&lt;/div&gt;
             &lt;div class=&quot;contact-card-text&quot;&gt;
               &lt;h4&gt;Service Centre Address&lt;/h4&gt;
-              &lt;p&gt;Prithviraj Chowk, Opposite Laxmi Uma Plaza, East Lohanipur, Patna 800003, Bihar, India&lt;/p&gt;
+              &lt;p&gt;Prithviraj Chowk, Das Ln, East Lohanipur, Kadamkuan, Patna, Bihar 800001 (Opposite Laxmi Uma Plaza)&lt;/p&gt;
+              &lt;a href=&quot;https://www.google.com/maps/place/2+wheeler+service+centre/@25.6064743,85.1532412,17z/data=!3m1!4b1!4m6!3m5!1s0x39ed59f4eae27567:0xad103d22f65fc59f!8m2!3d25.6064743!4d85.1532412!16s%2Fg%2F11xf02gfc2?hl=en-GB&quot; target=&quot;_blank&quot; rel=&quot;noopener noreferrer&quot; style=&quot;color: var(--accent); font-size: 0.85rem; font-weight: 600; display: inline-block; margin-top: 0.35rem; text-decoration: none;&quot;&gt;Open in Google Maps &amp;rarr;&lt;/a&gt;
             &lt;/div&gt;
           &lt;/div&gt;
           &lt;!-- Mobile Card --&gt;
@@ -1950,13 +1951,13 @@ export default app;
           &lt;/div&gt;
         &lt;/div&gt;
 
-        &lt;!-- Google Map Embedding (Lohanipur Patna) --&gt;
+        &lt;!-- Google Map Embedding (2 wheeler service centre, Lohanipur Patna) --&gt;
         &lt;div class=&quot;map-pane&quot;&gt;
           &lt;iframe 
-            src=&quot;https://maps.google.com/maps?q=Laxmi+Uma+Plaza,+Lohanipur,+Patna,+Bihar+800003&amp;t=&amp;z=16&amp;ie=UTF8&amp;iwloc=&amp;output=embed&quot; 
+            src=&quot;https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3597.953110833896!2d85.1532412!3d25.6064743!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ed59f4eae27567%3A0xad103d22f65fc59f!2s2%20wheeler%20service%20centre!5e0!3m2!1sen!2sin!4v1795616518379!5m2!1sen!2sin&quot; 
             allowfullscreen=&quot;&quot; 
             loading=&quot;lazy&quot; 
-            referrerpolicy=&quot;no-referrer-when-downgrade&quot;&gt;
+            referrerpolicy=&quot;strict-origin-when-cross-origin&quot;&gt;
           &lt;/iframe&gt;
         &lt;/div&gt;
       &lt;/div&gt;
@@ -5044,6 +5045,13 @@ footer {
   width: 18px;
   height: 18px;
   fill: var(--accent);
+}
+
+.symptom-chat-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .symptom-chat-title h4 {

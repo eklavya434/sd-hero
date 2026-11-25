@@ -1956,7 +1956,6 @@ export default app;
           &lt;iframe 
             src=&quot;https://maps.google.com/maps?q=25.606964,85.1528064+(S.D.+Hero+Service)&amp;t=&amp;z=18&amp;ie=UTF8&amp;iwloc=&amp;output=embed&quot; 
             allowfullscreen=&quot;&quot; 
-            loading=&quot;lazy&quot; 
             referrerpolicy=&quot;strict-origin-when-cross-origin&quot;&gt;
           &lt;/iframe&gt;
         &lt;/div&gt;
@@ -4936,7 +4935,7 @@ footer {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 1000;
+  z-index: 2100;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 }
 
@@ -4986,7 +4985,7 @@ footer {
   left: 30px;
   width: 380px;
   height: 550px;
-  max-height: 80vh;
+  max-height: calc(100vh - 190px);
   max-width: calc(100vw - 60px);
   background: rgba(23, 25, 33, 0.95);
   backdrop-filter: blur(10px);
@@ -4996,7 +4995,7 @@ footer {
   display: none; /* Controlled by JS toggle */
   flex-direction: column;
   overflow: hidden;
-  z-index: 1000;
+  z-index: 2100;
   animation: slide-up-fade var(--transition-normal) forwards;
 }
 
@@ -5241,8 +5240,9 @@ footer {
 
 .symptom-diagnosis-detail {
   font-size: 0.85rem;
-  color: var(--text-muted);
-  border-top: 1px solid rgba(255,255,255,0.05);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  border-top: 1px solid rgba(255,255,255,0.08);
   padding-top: 0.5rem;
 }
 
